@@ -1,3 +1,8 @@
+<!-- ============================================================
+     INDEX.HTML - ЧАСТЬ 1 из 3
+     Версия: 2.3 (без поля "Ответственный")
+     Содержит: DOCTYPE, HEAD, все CSS стили, начало BODY
+     ============================================================ -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,15 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Заявки на материалы</title>
     <style>
-/* ============================================================
-   ОСНОВНЫЕ СТИЛИ
-   ============================================================ */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,10 +18,6 @@ body {
     min-height: 100vh;
     color: #ffffff;
 }
-
-/* ============================================================
-   ЭКРАН ВХОДА
-   ============================================================ */
 
 .login-container {
     display: flex;
@@ -81,9 +74,7 @@ body {
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
 }
 
-.login-box input::placeholder {
-    color: #888;
-}
+.login-box input::placeholder { color: #888; }
 
 .login-box button {
     width: 100%;
@@ -109,10 +100,6 @@ body {
     margin-top: 15px;
     font-size: 14px;
 }
-
-/* ============================================================
-   ОСНОВНОЙ КОНТЕЙНЕР
-   ============================================================ */
 
 .main-container {
     display: none;
@@ -145,10 +132,7 @@ body {
     flex-wrap: wrap;
 }
 
-.user-info span {
-    color: #aaa;
-    font-size: 14px;
-}
+.user-info span { color: #aaa; font-size: 14px; }
 
 .user-info .department {
     background: rgba(0, 212, 255, 0.2);
@@ -158,15 +142,7 @@ body {
     font-weight: bold;
 }
 
-.header-buttons {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* ============================================================
-   КНОПКИ
-   ============================================================ */
+.header-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .btn {
     padding: 10px 20px;
@@ -197,9 +173,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
 
 .btn-danger {
     background: rgba(255, 107, 107, 0.2);
@@ -207,28 +181,7 @@ body {
     border: 1px solid rgba(255, 107, 107, 0.3);
 }
 
-.btn-danger:hover {
-    background: rgba(255, 107, 107, 0.3);
-}
-
-.btn-success {
-    background: rgba(0, 255, 136, 0.2);
-    color: #00ff88;
-    border: 1px solid rgba(0, 255, 136, 0.3);
-}
-
-.btn-success:hover {
-    background: rgba(0, 255, 136, 0.3);
-}
-
-.btn-small {
-    padding: 5px 10px;
-    font-size: 12px;
-}
-
-/* ============================================================
-   ФОРМА ЗАЯВКИ
-   ============================================================ */
+.btn-danger:hover { background: rgba(255, 107, 107, 0.3); }
 
 .order-form {
     background: rgba(255, 255, 255, 0.05);
@@ -245,11 +198,7 @@ body {
     margin-bottom: 30px;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+.form-group { display: flex; flex-direction: column; gap: 8px; }
 
 .form-group label {
     color: #aaa;
@@ -276,26 +225,12 @@ body {
     box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
 }
 
-.form-group select option {
-    background: #1a1a2e;
-    color: #fff;
-}
+.form-group select option { background: #1a1a2e; color: #fff; }
 
 .form-group input:disabled,
-.form-group select:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+.form-group select:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ============================================================
-   ТАБЛИЦА ПОЗИЦИЙ
-   ============================================================ */
-
-.positions-section h3 {
-    margin-bottom: 15px;
-    color: #00d4ff;
-    font-size: 16px;
-}
+.positions-section h3 { margin-bottom: 15px; color: #00d4ff; font-size: 16px; }
 
 .positions-table-container {
     overflow-x: auto;
@@ -303,11 +238,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.positions-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
-}
+.positions-table { width: 100%; border-collapse: collapse; min-width: 800px; }
 
 .positions-table th {
     background: rgba(0, 212, 255, 0.1);
@@ -325,9 +256,7 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.positions-table tr:hover {
-    background: rgba(255, 255, 255, 0.02);
-}
+.positions-table tr:hover { background: rgba(255, 255, 255, 0.02); }
 
 .positions-table input,
 .positions-table select {
@@ -339,15 +268,11 @@ body {
     color: #fff;
     font-size: 13px;
 }
-.positions-table select option {
-    background: #1a1a2e;
-    color: #fff;
-}
+
 .positions-table input:focus,
-.positions-table select:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.15);
-}
+.positions-table select:focus { outline: none; background: rgba(255, 255, 255, 0.15); }
+
+.positions-table select option { background: #1a1a2e; color: #fff; }
 
 .positions-table .col-num { width: 50px; text-align: center; }
 .positions-table .col-name { min-width: 200px; }
@@ -357,10 +282,6 @@ body {
 .positions-table .col-note { min-width: 150px; }
 .positions-table .col-status { width: 70px; text-align: center; }
 .positions-table .col-action { width: 50px; text-align: center; }
-
-/* ============================================================
-   КНОПКИ СТАТУСА
-   ============================================================ */
 
 .status-btn {
     width: 36px;
@@ -387,15 +308,8 @@ body {
     box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
 }
 
-.status-btn:hover {
-    transform: scale(1.1);
-}
-
-.status-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
+.status-btn:hover { transform: scale(1.1); }
+.status-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .delete-row-btn {
     width: 30px;
@@ -409,20 +323,9 @@ body {
     font-size: 18px;
 }
 
-.delete-row-btn:hover {
-    background: rgba(255, 107, 107, 0.4);
-    transform: scale(1.1);
-}
-/* ============================================================
-   КНОПКИ ДЕЙСТВИЙ ФОРМЫ
-   ============================================================ */
+.delete-row-btn:hover { background: rgba(255, 107, 107, 0.4); transform: scale(1.1); }
 
-.form-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
+.form-actions { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
 
 .add-row-btn {
     display: flex;
@@ -438,22 +341,12 @@ body {
     font-size: 14px;
 }
 
-.add-row-btn:hover {
-    background: rgba(0, 212, 255, 0.2);
-    border-style: solid;
-}
-
-/* ============================================================
-   МОДАЛЬНЫЕ ОКНА
-   ============================================================ */
+.add-row-btn:hover { background: rgba(0, 212, 255, 0.2); border-style: solid; }
 
 .modal-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
     z-index: 1000;
@@ -462,9 +355,7 @@ body {
     padding: 20px;
 }
 
-.modal-overlay.active {
-    display: flex;
-}
+.modal-overlay.active { display: flex; }
 
 .modal {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -486,14 +377,10 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.modal-header h2 {
-    color: #00d4ff;
-    font-size: 18px;
-}
+.modal-header h2 { color: #00d4ff; font-size: 18px; }
 
 .modal-close {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.1);
@@ -503,16 +390,9 @@ body {
     transition: all 0.3s ease;
 }
 
-.modal-close:hover {
-    background: rgba(255, 107, 107, 0.3);
-    color: #ff6b6b;
-}
+.modal-close:hover { background: rgba(255, 107, 107, 0.3); color: #ff6b6b; }
 
-.modal-body {
-    padding: 30px;
-    overflow-y: auto;
-    max-height: calc(90vh - 140px);
-}
+.modal-body { padding: 30px; overflow-y: auto; max-height: calc(90vh - 140px); }
 
 .modal-footer {
     display: flex;
@@ -523,25 +403,10 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ============================================================
-   ИСТОРИЯ ЗАЯВОК
-   ============================================================ */
+.history-filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+.history-filters .form-group { min-width: 150px; }
 
-.history-filters {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.history-filters .form-group {
-    min-width: 150px;
-}
-
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+.history-table { width: 100%; border-collapse: collapse; }
 
 .history-table th {
     background: rgba(0, 212, 255, 0.1);
@@ -560,14 +425,8 @@ body {
     font-size: 14px;
 }
 
-.history-table tr:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.history-table tr {
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+.history-table tr:hover { background: rgba(255, 255, 255, 0.05); }
+.history-table tr { cursor: pointer; transition: all 0.2s ease; }
 
 .status-badge {
     display: inline-block;
@@ -577,24 +436,9 @@ body {
     font-weight: bold;
 }
 
-.status-badge.completed {
-    background: rgba(0, 255, 136, 0.2);
-    color: #00ff88;
-}
-
-.status-badge.partial {
-    background: rgba(255, 193, 7, 0.2);
-    color: #ffc107;
-}
-
-.status-badge.pending {
-    background: rgba(255, 107, 107, 0.2);
-    color: #ff6b6b;
-}
-
-/* ============================================================
-   ДЕТАЛИ ЗАЯВКИ
-   ============================================================ */
+.status-badge.completed { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+.status-badge.partial { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+.status-badge.pending { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
 
 .order-details-header {
     display: grid;
@@ -606,63 +450,35 @@ body {
     border-radius: 10px;
 }
 
-.detail-item {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.detail-item label {
-    color: #888;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.detail-item span {
-    color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* ============================================================
-   ЗАГРУЗКА И УВЕДОМЛЕНИЯ
-   ============================================================ */
+.detail-item { display: flex; flex-direction: column; gap: 5px; }
+.detail-item label { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.detail-item span { color: #fff; font-size: 14px; font-weight: 500; }
 
 .loading-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.7);
     z-index: 2000;
     justify-content: center;
     align-items: center;
 }
 
-.loading-overlay.active {
-    display: flex;
-}
+.loading-overlay.active { display: flex; }
 
 .spinner {
-    width: 50px;
-    height: 50px;
+    width: 50px; height: 50px;
     border: 4px solid rgba(255, 255, 255, 0.1);
     border-top-color: #00d4ff;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .toast {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 30px; right: 30px;
     padding: 15px 25px;
     border-radius: 10px;
     color: white;
@@ -673,92 +489,39 @@ body {
     max-width: 350px;
 }
 
-.toast.active {
-    transform: translateX(0);
-}
-
-.toast.success {
-    background: linear-gradient(135deg, #00ff88, #00d4ff);
-    color: #1a1a2e;
-}
-
-.toast.error {
-    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-    color: #1a1a2e;
-}
-
-.toast.warning {
-    background: linear-gradient(135deg, #ffc107, #ffdb4d);
-    color: #1a1a2e;
-}
-
-/* ============================================================
-   АДАПТИВНОСТЬ
-   ============================================================ */
+.toast.active { transform: translateX(0); }
+.toast.success { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #1a1a2e; }
+.toast.error { background: linear-gradient(135deg, #ff6b6b, #ff8e8e); color: #1a1a2e; }
+.toast.warning { background: linear-gradient(135deg, #ffc107, #ffdb4d); color: #1a1a2e; }
 
 @media (max-width: 768px) {
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .header-buttons {
-        width: 100%;
-    }
-    .header-buttons .btn {
-        flex: 1;
-        justify-content: center;
-    }
-    .form-header {
-        grid-template-columns: 1fr;
-    }
-    .modal {
-        margin: 10px;
-        max-height: 95vh;
-    }
-    .modal-body {
-        padding: 15px;
-    }
-    .history-filters {
-        flex-direction: column;
-    }
-    .history-filters .form-group {
-        width: 100%;
-    }
+    .header { flex-direction: column; align-items: flex-start; }
+    .header-buttons { width: 100%; }
+    .header-buttons .btn { flex: 1; justify-content: center; }
+    .form-header { grid-template-columns: 1fr; }
+    .modal { margin: 10px; max-height: 95vh; }
+    .modal-body { padding: 15px; }
+    .history-filters { flex-direction: column; }
+    .history-filters .form-group { width: 100%; }
 }
 
 @media print {
-    body {
-        background: white !important;
-        color: black !important;
-    }
+    body { background: white !important; color: black !important; }
     .login-container, .header, .form-actions, .modal-overlay, .btn,
-    .delete-row-btn, .add-row-btn, .loading-overlay, .toast {
-        display: none !important;
-    }
-    .main-container {
-        display: block !important;
-        padding: 0;
-        max-width: none;
-    }
-    .order-form {
-        background: white;
-        border: none;
-        padding: 0;
-    }
+    .delete-row-btn, .add-row-btn, .loading-overlay, .toast { display: none !important; }
+    .main-container { display: block !important; padding: 0; max-width: none; }
+    .order-form { background: white; border: none; padding: 0; }
 }
     </style>
 </head>
 <body>
 
-<!-- ЗАГРУЗКА -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
 </div>
 
-<!-- УВЕДОМЛЕНИЯ -->
 <div class="toast" id="toast"></div>
 
-<!-- ЭКРАН ВХОДА -->
 <div class="login-container" id="loginScreen">
     <div class="login-box">
         <h1>📦 Заявки на материалы</h1>
@@ -769,10 +532,7 @@ body {
     </div>
 </div>
 
-<!-- ОСНОВНОЙ КОНТЕЙНЕР -->
 <div class="main-container" id="mainScreen">
-    
-    <!-- Шапка -->
     <div class="header">
         <h1>📦 Заявки на материалы</h1>
         <div class="user-info">
@@ -786,10 +546,7 @@ body {
         </div>
     </div>
 
-    <!-- Форма заявки -->
     <div class="order-form" id="orderForm">
-        
-        <!-- Шапка формы -->
         <div class="form-header">
             <div class="form-group">
                 <label>№ заявки</label>
@@ -801,9 +558,7 @@ body {
             </div>
             <div class="form-group">
                 <label>Подразделение</label>
-                <select id="orderDepartment" disabled>
-                    <option value="">-</option>
-                </select>
+                <select id="orderDepartment" disabled><option value="">-</option></select>
             </div>
             <div class="form-group">
                 <label>Объект (до 20 символов)</label>
@@ -811,25 +566,14 @@ body {
             </div>
             <div class="form-group">
                 <label>Категория</label>
-                <select id="orderCategory">
-                    <option value="">Выберите...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Ответственный</label>
-                <select id="orderResponsible">
-                    <option value="">Выберите...</option>
-                </select>
+                <select id="orderCategory"><option value="">Выберите...</option></select>
             </div>
             <div class="form-group">
                 <label>Создал заявку</label>
-                <select id="orderCreatedBy">
-                    <option value="">Выберите...</option>
-                </select>
+                <select id="orderCreatedBy"><option value="">Выберите...</option></select>
             </div>
         </div>
 
-        <!-- Таблица позиций -->
         <div class="positions-section">
             <h3>Позиции заявки (максимум 15)</h3>
             <div class="positions-table-container">
@@ -850,7 +594,6 @@ body {
             </div>
         </div>
 
-        <!-- Кнопки действий -->
         <div class="form-actions">
             <button class="add-row-btn" onclick="addPositionRow()">
                 <span>➕</span> Добавить позицию
@@ -861,7 +604,16 @@ body {
         </div>
     </div>
 </div>
-<!-- МОДАЛЬНОЕ ОКНО: ИСТОРИЯ ЗАЯВОК -->
+<!-- ============================================================
+     КОНЕЦ ЧАСТИ 1 из 3
+     Следующая часть: модальные окна (история, детали заявки)
+     ============================================================ -->
+<!-- ============================================================
+     INDEX.HTML - ЧАСТЬ 2 из 3
+     Версия: 2.3 (без поля "Ответственный")
+     Содержит: модальные окна (история, детали заявки)
+     ============================================================ -->
+
 <div class="modal-overlay" id="historyModal">
     <div class="modal">
         <div class="modal-header">
@@ -893,8 +645,8 @@ body {
                             <th>Дата</th>
                             <th>Подразделение</th>
                             <th>Объект</th>
+                            <th>Категория</th>
                             <th>Создал</th>
-                            <th>Ответственный</th>
                             <th>Статус</th>
                         </tr>
                     </thead>
@@ -909,7 +661,6 @@ body {
     </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО: ДЕТАЛИ ЗАЯВКИ -->
 <div class="modal-overlay" id="orderDetailsModal">
     <div class="modal">
         <div class="modal-header">
@@ -937,10 +688,6 @@ body {
                 <div class="detail-item">
                     <label>Категория</label>
                     <span id="detailCategory">-</span>
-                </div>
-                <div class="detail-item">
-                    <label>Ответственный</label>
-                    <span id="detailResponsible">-</span>
                 </div>
                 <div class="detail-item">
                     <label>Создал заявку</label>
@@ -975,14 +722,10 @@ body {
 
 <script>
 // ============================================================
-// КОНФИГУРАЦИЯ
+// КОНФИГУРАЦИЯ И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 // ============================================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbw2dgO3yxAG_sYgDWct_ye_iEptfRA6qE4ckYtZ4Aa7zq6KxAMn3BhjMHy4xjqZdI7K/exec';
-
-// ============================================================
-// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-// ============================================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbwCMXnkBgheVwoTcwkwq85mVAK9KpXJ_o-FNCTJH6p16_ScPFbMfOuSai5AfENC9IOE/exec';
 
 let currentUser = { role: '', department: '', employees: [], password: '' };
 let settings = { units: [], categories: [], departments: [] };
@@ -993,19 +736,14 @@ let positionRowCount = 0;
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ============================================================
 
-function showLoading() {
-    document.getElementById('loadingOverlay').classList.add('active');
-}
+function showLoading() { document.getElementById('loadingOverlay').classList.add('active'); }
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
 
-function hideLoading() {
-    document.getElementById('loadingOverlay').classList.remove('active');
-}
-
-function showToast(message, type = 'success') {
+function showToast(message, type) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
-    toast.className = 'toast ' + type + ' active';
-    setTimeout(() => toast.classList.remove('active'), 4000);
+    toast.className = 'toast ' + (type || 'success') + ' active';
+    setTimeout(function() { toast.classList.remove('active'); }, 4000);
 }
 
 function formatDate(date) {
@@ -1015,22 +753,24 @@ function formatDate(date) {
     const year = d.getFullYear();
     const hours = String(d.getHours()).padStart(2, '0');
     const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${day}.${month}.${year} ${hours}:${minutes}`;
+    return day + '.' + month + '.' + year + ' ' + hours + ':' + minutes;
 }
 
 // ============================================================
-// API ЗАПРОСЫ (JSONP для обхода CORS)
+// API ЗАПРОСЫ (JSONP)
 // ============================================================
 
 function apiRequest(params) {
-    return new Promise((resolve) => {
+    return new Promise(function(resolve) {
         const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-        
         const url = new URL(API_URL);
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+        
+        Object.keys(params).forEach(function(key) {
+            url.searchParams.append(key, params[key]);
+        });
         url.searchParams.append('callback', callbackName);
         
-        window[callbackName] = (data) => {
+        window[callbackName] = function(data) {
             resolve(data);
             cleanup();
         };
@@ -1040,13 +780,12 @@ function apiRequest(params) {
             if (script && script.parentNode) script.parentNode.removeChild(script);
         }
         
-        const script = document.createElement('script');
+        var script = document.createElement('script');
         script.src = url.toString();
-        script.onerror = () => {
+        script.onerror = function() {
             resolve({ success: false, error: 'Ошибка соединения с сервером' });
             cleanup();
         };
-        
         document.head.appendChild(script);
     });
 }
@@ -1068,7 +807,6 @@ async function handleLogin() {
     errorDiv.textContent = '';
     
     const result = await apiRequest({ action: 'login', password: password });
-    
     hideLoading();
     
     if (result.success) {
@@ -1138,47 +876,37 @@ async function loadSettings() {
 }
 
 function populateSelects() {
-    // Подразделение
-    const deptSelect = document.getElementById('orderDepartment');
+    var deptSelect = document.getElementById('orderDepartment');
     deptSelect.innerHTML = '';
+    
     if (currentUser.role === 'admin') {
         deptSelect.disabled = false;
-        settings.departments.forEach(dept => {
-            deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
+        settings.departments.forEach(function(dept) {
+            deptSelect.innerHTML += '<option value="' + dept + '">' + dept + '</option>';
         });
     } else {
         deptSelect.disabled = true;
-        deptSelect.innerHTML = `<option value="${currentUser.department}">${currentUser.department}</option>`;
+        deptSelect.innerHTML = '<option value="' + currentUser.department + '">' + currentUser.department + '</option>';
     }
     
-    // Категория
-    const catSelect = document.getElementById('orderCategory');
+    var catSelect = document.getElementById('orderCategory');
     catSelect.innerHTML = '<option value="">Выберите...</option>';
-    settings.categories.forEach(cat => {
-        catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+    settings.categories.forEach(function(cat) {
+        catSelect.innerHTML += '<option value="' + cat + '">' + cat + '</option>';
     });
     
-    // Ответственный
-    const respSelect = document.getElementById('orderResponsible');
-    respSelect.innerHTML = '<option value="">Выберите...</option>';
-    currentUser.employees.forEach(emp => {
-        respSelect.innerHTML += `<option value="${emp}">${emp}</option>`;
-    });
-    
-    // Создал заявку
-    const createdBySelect = document.getElementById('orderCreatedBy');
+    var createdBySelect = document.getElementById('orderCreatedBy');
     createdBySelect.innerHTML = '<option value="">Выберите...</option>';
-    currentUser.employees.forEach(emp => {
-        createdBySelect.innerHTML += `<option value="${emp}">${emp}</option>`;
+    currentUser.employees.forEach(function(emp) {
+        createdBySelect.innerHTML += '<option value="' + emp + '">' + emp + '</option>';
     });
     
-    // Фильтр подразделений в истории
-    const filterDeptSelect = document.getElementById('filterDepartment');
+    var filterDeptSelect = document.getElementById('filterDepartment');
     filterDeptSelect.innerHTML = '<option value="">Все</option>';
     if (currentUser.role === 'admin') {
         filterDeptSelect.disabled = false;
-        settings.departments.forEach(dept => {
-            filterDeptSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
+        settings.departments.forEach(function(dept) {
+            filterDeptSelect.innerHTML += '<option value="' + dept + '">' + dept + '</option>';
         });
     } else {
         filterDeptSelect.disabled = true;
@@ -1202,9 +930,9 @@ function showMainScreen() {
 // УПРАВЛЕНИЕ ПОЗИЦИЯМИ
 // ============================================================
 
-function addPositionRow(data = null) {
-    const tbody = document.getElementById('positionsBody');
-    const currentRows = tbody.querySelectorAll('tr').length;
+function addPositionRow(data) {
+    var tbody = document.getElementById('positionsBody');
+    var currentRows = tbody.querySelectorAll('tr').length;
     
     if (currentRows >= 15) {
         showToast('Максимум 15 позиций', 'warning');
@@ -1212,30 +940,30 @@ function addPositionRow(data = null) {
     }
     
     positionRowCount++;
-    const rowNum = currentRows + 1;
+    var rowNum = currentRows + 1;
     
-    let unitsOptions = '<option value="">-</option>';
-    settings.units.forEach(unit => {
-        const selected = (data && data.unit === unit) ? 'selected' : '';
-        unitsOptions += `<option value="${unit}" ${selected}>${unit}</option>`;
+    var unitsOptions = '<option value="">-</option>';
+    settings.units.forEach(function(unit) {
+        var selected = (data && data.unit === unit) ? ' selected' : '';
+        unitsOptions += '<option value="' + unit + '"' + selected + '>' + unit + '</option>';
     });
     
-    const tr = document.createElement('tr');
+    var tr = document.createElement('tr');
     tr.setAttribute('data-row-id', positionRowCount);
-    tr.innerHTML = `
-        <td class="col-num">${rowNum}</td>
-        <td class="col-name"><input type="text" placeholder="Наименование" value="${data ? data.name : ''}"></td>
-        <td class="col-unit"><select>${unitsOptions}</select></td>
-        <td class="col-qty"><input type="number" min="0" step="0.01" placeholder="0" value="${data ? data.quantity : ''}"></td>
-        <td class="col-article"><input type="text" placeholder="Артикул" value="${data ? data.article : ''}"></td>
-        <td class="col-note"><input type="text" placeholder="Примечание" value="${data ? data.note : ''}"></td>
-        <td class="col-action"><button class="delete-row-btn" onclick="deletePositionRow(this)">✕</button></td>
-    `;
+    tr.innerHTML = 
+        '<td class="col-num">' + rowNum + '</td>' +
+        '<td class="col-name"><input type="text" placeholder="Наименование" value="' + (data ? data.name : '') + '"></td>' +
+        '<td class="col-unit"><select>' + unitsOptions + '</select></td>' +
+        '<td class="col-qty"><input type="number" min="0" step="0.01" placeholder="0" value="' + (data ? data.quantity : '') + '"></td>' +
+        '<td class="col-article"><input type="text" placeholder="Артикул" value="' + (data ? data.article : '') + '"></td>' +
+        '<td class="col-note"><input type="text" placeholder="Примечание" value="' + (data ? data.note : '') + '"></td>' +
+        '<td class="col-action"><button class="delete-row-btn" onclick="deletePositionRow(this)">✕</button></td>';
+    
     tbody.appendChild(tr);
 }
 
 function deletePositionRow(btn) {
-    const tbody = document.getElementById('positionsBody');
+    var tbody = document.getElementById('positionsBody');
     if (tbody.querySelectorAll('tr').length <= 1) {
         showToast('Должна остаться хотя бы одна позиция', 'warning');
         return;
@@ -1245,20 +973,22 @@ function deletePositionRow(btn) {
 }
 
 function renumberPositions() {
-    const rows = document.getElementById('positionsBody').querySelectorAll('tr');
-    rows.forEach((row, index) => {
+    var rows = document.getElementById('positionsBody').querySelectorAll('tr');
+    rows.forEach(function(row, index) {
         row.querySelector('.col-num').textContent = index + 1;
     });
 }
 
 function getPositionsData() {
-    const rows = document.getElementById('positionsBody').querySelectorAll('tr');
-    const positions = [];
-    rows.forEach(row => {
-        const inputs = row.querySelectorAll('input');
-        const select = row.querySelector('select');
-        const name = inputs[0].value.trim();
-        const quantity = inputs[1].value.trim();
+    var rows = document.getElementById('positionsBody').querySelectorAll('tr');
+    var positions = [];
+    
+    rows.forEach(function(row) {
+        var inputs = row.querySelectorAll('input');
+        var select = row.querySelector('select');
+        var name = inputs[0].value.trim();
+        var quantity = inputs[1].value.trim();
+        
         if (name || quantity) {
             positions.push({
                 name: name,
@@ -1269,6 +999,7 @@ function getPositionsData() {
             });
         }
     });
+    
     return positions;
 }
 
@@ -1277,47 +1008,74 @@ function clearForm() {
     document.getElementById('orderDate').value = formatDate(new Date());
     document.getElementById('orderObject').value = '';
     document.getElementById('orderCategory').value = '';
-    document.getElementById('orderResponsible').value = '';
     document.getElementById('orderCreatedBy').value = '';
     document.getElementById('positionsBody').innerHTML = '';
     positionRowCount = 0;
     addPositionRow();
 }
+<!-- ============================================================
+     КОНЕЦ ЧАСТИ 2 из 3
+     Следующая часть: функции сохранения, истории, печати, инициализация
+     ============================================================ -->
+<!-- ============================================================
+     INDEX.HTML - ЧАСТЬ 3 из 3 (ФИНАЛЬНАЯ)
+     Версия: 2.3 (без поля "Ответственный", печать с "Принял в работу")
+     Содержит: сохранение, история, детали, статусы, печать, инициализация
+     ============================================================ -->
 
 // ============================================================
 // СОХРАНЕНИЕ ЗАЯВКИ
 // ============================================================
 
 async function saveOrder() {
-    const department = document.getElementById('orderDepartment').value;
-    const object = document.getElementById('orderObject').value.trim();
-    const category = document.getElementById('orderCategory').value;
-    const responsible = document.getElementById('orderResponsible').value;
-    const createdBy = document.getElementById('orderCreatedBy').value;
+    var department = document.getElementById('orderDepartment').value;
+    var object = document.getElementById('orderObject').value.trim();
+    var category = document.getElementById('orderCategory').value;
+    var createdBy = document.getElementById('orderCreatedBy').value;
     
-    if (!object) { showToast('Укажите объект', 'error'); return; }
-    if (!category) { showToast('Выберите категорию', 'error'); return; }
-    if (!responsible) { showToast('Выберите ответственного', 'error'); return; }
-    if (!createdBy) { showToast('Укажите, кто создал заявку', 'error'); return; }
+    if (!object) {
+        showToast('Укажите объект', 'error');
+        return;
+    }
+    if (!category) {
+        showToast('Выберите категорию', 'error');
+        return;
+    }
+    if (!createdBy) {
+        showToast('Укажите, кто создал заявку', 'error');
+        return;
+    }
     
-    const positions = getPositionsData();
-    if (positions.length === 0) { showToast('Добавьте хотя бы одну позицию', 'error'); return; }
+    var positions = getPositionsData();
     
-    for (let i = 0; i < positions.length; i++) {
-        if (!positions[i].name) { showToast(`Укажите наименование в позиции ${i + 1}`, 'error'); return; }
-        if (!positions[i].unit) { showToast(`Выберите ед. измерения в позиции ${i + 1}`, 'error'); return; }
-        if (!positions[i].quantity || positions[i].quantity <= 0) { showToast(`Укажите количество в позиции ${i + 1}`, 'error'); return; }
+    if (positions.length === 0) {
+        showToast('Добавьте хотя бы одну позицию', 'error');
+        return;
+    }
+    
+    for (var i = 0; i < positions.length; i++) {
+        if (!positions[i].name) {
+            showToast('Укажите наименование в позиции ' + (i + 1), 'error');
+            return;
+        }
+        if (!positions[i].unit) {
+            showToast('Выберите ед. измерения в позиции ' + (i + 1), 'error');
+            return;
+        }
+        if (!positions[i].quantity || positions[i].quantity <= 0) {
+            showToast('Укажите количество в позиции ' + (i + 1), 'error');
+            return;
+        }
     }
     
     showLoading();
     
-    const result = await apiRequest({
+    var result = await apiRequest({
         action: 'saveOrder',
         password: currentUser.password,
         department: department,
         object: object,
         category: category,
-        responsible: responsible,
         createdBy: createdBy,
         positions: encodeURIComponent(JSON.stringify(positions))
     });
@@ -1325,7 +1083,7 @@ async function saveOrder() {
     hideLoading();
     
     if (result.success) {
-        showToast(`Заявка ${result.orderNumber} сохранена!`, 'success');
+        showToast('Заявка ' + result.orderNumber + ' сохранена!', 'success');
         clearForm();
     } else {
         showToast(result.error || 'Ошибка сохранения', 'error');
@@ -1352,18 +1110,20 @@ function clearFilters() {
 }
 
 async function loadHistory() {
-    const filterDept = document.getElementById('filterDepartment').value;
-    const filterDate = document.getElementById('filterDate').value;
+    var filterDept = document.getElementById('filterDepartment').value;
+    var filterDate = document.getElementById('filterDate').value;
     
     showLoading();
     
-    let formattedDate = '';
+    var formattedDate = '';
     if (filterDate) {
-        const d = new Date(filterDate);
-        formattedDate = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+        var d = new Date(filterDate);
+        formattedDate = String(d.getDate()).padStart(2, '0') + '.' + 
+                        String(d.getMonth() + 1).padStart(2, '0') + '.' + 
+                        d.getFullYear();
     }
     
-    const result = await apiRequest({
+    var result = await apiRequest({
         action: 'getHistory',
         password: currentUser.password,
         filterDept: filterDept,
@@ -1372,32 +1132,36 @@ async function loadHistory() {
     
     hideLoading();
     
-    const tbody = document.getElementById('historyBody');
-    const emptyDiv = document.getElementById('historyEmpty');
+    var tbody = document.getElementById('historyBody');
+    var emptyDiv = document.getElementById('historyEmpty');
     
     if (result.success && result.orders && result.orders.length > 0) {
         tbody.innerHTML = '';
         emptyDiv.style.display = 'none';
         
-        result.orders.forEach(order => {
-            let statusClass = 'pending', statusText = 'Ожидает';
+        result.orders.forEach(function(order) {
+            var statusClass = 'pending';
+            var statusText = 'Ожидает';
+            
             if (order.completedPositions === order.totalPositions && order.totalPositions > 0) {
-                statusClass = 'completed'; statusText = 'Выполнено';
+                statusClass = 'completed';
+                statusText = 'Выполнено';
             } else if (order.completedPositions > 0) {
-                statusClass = 'partial'; statusText = `${order.completedPositions}/${order.totalPositions}`;
+                statusClass = 'partial';
+                statusText = order.completedPositions + '/' + order.totalPositions;
             }
             
-            const tr = document.createElement('tr');
-            tr.onclick = () => openOrderDetails(order.id);
-            tr.innerHTML = `
-                <td><strong>${order.number}</strong></td>
-                <td>${order.date}</td>
-                <td>${order.department}</td>
-                <td>${order.object || '-'}</td>
-                <td>${order.createdBy || '-'}</td>
-                <td>${order.responsible}</td>
-                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            `;
+            var tr = document.createElement('tr');
+            tr.onclick = function() { openOrderDetails(order.id); };
+            tr.innerHTML = 
+                '<td><strong>' + order.number + '</strong></td>' +
+                '<td>' + order.date + '</td>' +
+                '<td>' + order.department + '</td>' +
+                '<td>' + (order.object || '-') + '</td>' +
+                '<td>' + order.category + '</td>' +
+                '<td>' + (order.createdBy || '-') + '</td>' +
+                '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>';
+            
             tbody.appendChild(tr);
         });
     } else {
@@ -1414,7 +1178,7 @@ async function openOrderDetails(orderId) {
     currentOrderId = orderId;
     showLoading();
     
-    const result = await apiRequest({
+    var result = await apiRequest({
         action: 'getOrderDetails',
         orderId: orderId,
         password: currentUser.password
@@ -1423,43 +1187,43 @@ async function openOrderDetails(orderId) {
     hideLoading();
     
     if (result.success) {
-        const order = result.order;
+        var order = result.order;
+        
         document.getElementById('detailsOrderNumber').textContent = order.number;
         document.getElementById('detailNumber').textContent = order.number;
         document.getElementById('detailDate').textContent = order.date;
         document.getElementById('detailDepartment').textContent = order.department;
         document.getElementById('detailObject').textContent = order.object || '-';
         document.getElementById('detailCategory').textContent = order.category;
-        document.getElementById('detailResponsible').textContent = order.responsible;
         document.getElementById('detailCreatedBy').textContent = order.createdBy || '-';
         
         document.getElementById('deleteOrderBtn').style.display = 
             currentUser.role === 'admin' ? 'inline-flex' : 'none';
         
-        const tbody = document.getElementById('detailsPositionsBody');
+        var tbody = document.getElementById('detailsPositionsBody');
         tbody.innerHTML = '';
         
-        result.positions.forEach(pos => {
-            const statusClass = pos.status == 1 ? 'completed' : 'not-completed';
-            const statusIcon = pos.status == 1 ? '✓' : '✕';
-            const canChange = result.canChangeStatus && (currentUser.role === 'admin' || pos.status == 0);
+        result.positions.forEach(function(pos) {
+            var statusClass = pos.status == 1 ? 'completed' : 'not-completed';
+            var statusIcon = pos.status == 1 ? '✓' : '✕';
+            var canChange = result.canChangeStatus && (currentUser.role === 'admin' || pos.status == 0);
             
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="col-num">${pos.position}</td>
-                <td class="col-name">${pos.name}</td>
-                <td class="col-unit">${pos.unit}</td>
-                <td class="col-qty">${pos.quantity}</td>
-                <td class="col-article">${pos.article || '-'}</td>
-                <td class="col-note">${pos.note || '-'}</td>
-                <td class="col-status">
-                    <button class="status-btn ${statusClass}" 
-                            onclick="toggleStatus(${pos.rowIndex}, ${pos.status}, '${orderId}')"
-                            ${!canChange ? 'disabled' : ''}>
-                        ${statusIcon}
-                    </button>
-                </td>
-            `;
+            var tr = document.createElement('tr');
+            tr.innerHTML = 
+                '<td class="col-num">' + pos.position + '</td>' +
+                '<td class="col-name">' + pos.name + '</td>' +
+                '<td class="col-unit">' + pos.unit + '</td>' +
+                '<td class="col-qty">' + pos.quantity + '</td>' +
+                '<td class="col-article">' + (pos.article || '-') + '</td>' +
+                '<td class="col-note">' + (pos.note || '-') + '</td>' +
+                '<td class="col-status">' +
+                    '<button class="status-btn ' + statusClass + '" ' +
+                        'onclick="toggleStatus(' + pos.rowIndex + ', ' + pos.status + ', \'' + orderId + '\')" ' +
+                        (canChange ? '' : 'disabled') + '>' +
+                        statusIcon +
+                    '</button>' +
+                '</td>';
+            
             tbody.appendChild(tr);
         });
         
@@ -1477,11 +1241,11 @@ function closeOrderDetails() {
 }
 
 // ============================================================
-// ИЗМЕНЕНИЕ СТАТУСА
+// ИЗМЕНЕНИЕ СТАТУСА ПОЗИЦИИ
 // ============================================================
 
 async function toggleStatus(rowIndex, currentStatus, orderId) {
-    const newStatus = currentStatus == 1 ? 0 : 1;
+    var newStatus = currentStatus == 1 ? 0 : 1;
     
     if (currentUser.role !== 'admin' && currentStatus == 1) {
         showToast('Только администратор может отменить выполнение', 'warning');
@@ -1490,7 +1254,7 @@ async function toggleStatus(rowIndex, currentStatus, orderId) {
     
     showLoading();
     
-    const result = await apiRequest({
+    var result = await apiRequest({
         action: 'updateStatus',
         password: currentUser.password,
         rowIndex: rowIndex,
@@ -1517,11 +1281,13 @@ async function deleteCurrentOrder() {
     if (!confirm('Вы уверены, что хотите удалить эту заявку?')) return;
     
     showLoading();
-    const result = await apiRequest({
+    
+    var result = await apiRequest({
         action: 'deleteOrder',
         orderId: currentOrderId,
         password: currentUser.password
     });
+    
     hideLoading();
     
     if (result.success) {
@@ -1533,12 +1299,15 @@ async function deleteCurrentOrder() {
 }
 
 // ============================================================
-// ПЕЧАТЬ
+// ПЕЧАТЬ (с полем "Принял в работу" вместо "Ответственный")
 // ============================================================
 
 function printOrder() {
-    const positions = getPositionsData();
-    if (positions.length === 0) { showToast('Нет данных для печати', 'warning'); return; }
+    var positions = getPositionsData();
+    if (positions.length === 0) {
+        showToast('Нет данных для печати', 'warning');
+        return;
+    }
     
     generatePrintContent({
         number: document.getElementById('orderNumber').value || 'Новая заявка',
@@ -1546,16 +1315,17 @@ function printOrder() {
         department: document.getElementById('orderDepartment').value,
         object: document.getElementById('orderObject').value,
         category: document.getElementById('orderCategory').value,
-        responsible: document.getElementById('orderResponsible').value,
         createdBy: document.getElementById('orderCreatedBy').value,
         positions: positions
     });
 }
 
 function printOrderDetails() {
-    const positions = [];
-    document.getElementById('detailsPositionsBody').querySelectorAll('tr').forEach(row => {
-        const cells = row.querySelectorAll('td');
+    var positions = [];
+    var rows = document.getElementById('detailsPositionsBody').querySelectorAll('tr');
+    
+    rows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
         positions.push({
             name: cells[1].textContent,
             unit: cells[2].textContent,
@@ -1571,72 +1341,80 @@ function printOrderDetails() {
         department: document.getElementById('detailDepartment').textContent,
         object: document.getElementById('detailObject').textContent,
         category: document.getElementById('detailCategory').textContent,
-        responsible: document.getElementById('detailResponsible').textContent,
         createdBy: document.getElementById('detailCreatedBy').textContent,
         positions: positions
     });
 }
 
 function generatePrintContent(data) {
-    let positionsHTML = '';
-    data.positions.forEach((pos, index) => {
-        positionsHTML += `
-            <tr>
-                <td style="border:1px solid #000;padding:8px;text-align:center;">${index + 1}</td>
-                <td style="border:1px solid #000;padding:8px;">${pos.name}</td>
-                <td style="border:1px solid #000;padding:8px;text-align:center;">${pos.unit}</td>
-                <td style="border:1px solid #000;padding:8px;text-align:center;">${pos.quantity}</td>
-                <td style="border:1px solid #000;padding:8px;text-align:center;">${pos.article || '-'}</td>
-                <td style="border:1px solid #000;padding:8px;">${pos.note || '-'}</td>
-            </tr>
-        `;
+    var positionsHTML = '';
+    
+    data.positions.forEach(function(pos, index) {
+        positionsHTML += 
+            '<tr>' +
+                '<td style="border:1px solid #000;padding:8px;text-align:center;">' + (index + 1) + '</td>' +
+                '<td style="border:1px solid #000;padding:8px;">' + pos.name + '</td>' +
+                '<td style="border:1px solid #000;padding:8px;text-align:center;">' + pos.unit + '</td>' +
+                '<td style="border:1px solid #000;padding:8px;text-align:center;">' + pos.quantity + '</td>' +
+                '<td style="border:1px solid #000;padding:8px;text-align:center;">' + (pos.article || '-') + '</td>' +
+                '<td style="border:1px solid #000;padding:8px;">' + (pos.note || '-') + '</td>' +
+            '</tr>';
     });
     
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Заявка ${data.number}</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                h1 { text-align: center; font-size: 18px; margin-bottom: 20px; }
-                .header-info { margin-bottom: 20px; }
-                .header-info p { margin: 5px 0; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                th { border: 1px solid #000; padding: 8px; background: #f0f0f0; font-size: 12px; }
-            </style>
-        </head>
-        <body>
-            <h1>ЗАЯВКА НА МАТЕРИАЛЫ № ${data.number}</h1>
-            <div class="header-info">
-                <p><strong>Дата:</strong> ${data.date}</p>
-                <p><strong>Подразделение:</strong> ${data.department}</p>
-                <p><strong>Объект:</strong> ${data.object || '-'}</p>
-                <p><strong>Категория:</strong> ${data.category}</p>
-                <p><strong>Ответственный:</strong> ${data.responsible}</p>
-                <p><strong>Создал заявку:</strong> ${data.createdBy || '-'}</p>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:40px;">№</th>
-                        <th>Наименование</th>
-                        <th style="width:60px;">Ед.изм.</th>
-                        <th style="width:60px;">Кол-во</th>
-                        <th style="width:100px;">Артикул</th>
-                        <th style="width:150px;">Примечание</th>
-                    </tr>
-                </thead>
-                <tbody>${positionsHTML}</tbody>
-            </table>
-            <div style="margin-top:30px;">
-                <p><strong>Ответственный:</strong> _______________ / ${data.responsible} /</p>
-                <p style="margin-top:20px;"><strong>Создал заявку:</strong> _______________ / ${data.createdBy || ''} /</p>
-            </div>
-        </body>
-        </html>
-    `);
+    var printWindow = window.open('', '_blank');
+    printWindow.document.write(
+        '<!DOCTYPE html>' +
+        '<html>' +
+        '<head>' +
+            '<title>Заявка ' + data.number + '</title>' +
+            '<style>' +
+                'body { font-family: Arial, sans-serif; padding: 20px; }' +
+                'h1 { text-align: center; font-size: 18px; margin-bottom: 20px; }' +
+                '.header-info { margin-bottom: 20px; }' +
+                '.header-info p { margin: 5px 0; }' +
+                'table { width: 100%; border-collapse: collapse; margin-top: 20px; }' +
+                'th { border: 1px solid #000; padding: 8px; background: #f0f0f0; font-size: 12px; }' +
+                '.footer { margin-top: 40px; }' +
+                '.signature-block { margin-top: 30px; }' +
+            '</style>' +
+        '</head>' +
+        '<body>' +
+            '<h1>ЗАЯВКА НА МАТЕРИАЛЫ № ' + data.number + '</h1>' +
+            
+            '<div class="header-info">' +
+                '<p><strong>Дата:</strong> ' + data.date + '</p>' +
+                '<p><strong>Подразделение:</strong> ' + data.department + '</p>' +
+                '<p><strong>Объект:</strong> ' + (data.object || '-') + '</p>' +
+                '<p><strong>Категория:</strong> ' + data.category + '</p>' +
+                '<p><strong>Создал заявку:</strong> ' + (data.createdBy || '-') + '</p>' +
+            '</div>' +
+            
+            '<table>' +
+                '<thead>' +
+                    '<tr>' +
+                        '<th style="width:40px;">№</th>' +
+                        '<th>Наименование материала</th>' +
+                        '<th style="width:60px;">Ед.изм.</th>' +
+                        '<th style="width:60px;">Кол-во</th>' +
+                        '<th style="width:100px;">Артикул</th>' +
+                        '<th style="width:150px;">Примечание</th>' +
+                    '</tr>' +
+                '</thead>' +
+                '<tbody>' + positionsHTML + '</tbody>' +
+            '</table>' +
+            
+            '<div class="footer">' +
+                '<div class="signature-block">' +
+                    '<p><strong>Создал заявку:</strong> _______________ / ' + (data.createdBy || '_______________') + ' /</p>' +
+                '</div>' +
+                '<div class="signature-block">' +
+                    '<p><strong>Принял в работу:</strong> _______________ / _______________ /</p>' +
+                    '<p><strong>Дата:</strong> _______________</p>' +
+                '</div>' +
+            '</div>' +
+        '</body>' +
+        '</html>'
+    );
     printWindow.document.close();
     printWindow.print();
 }
@@ -1646,12 +1424,19 @@ function generatePrintContent(data) {
 // ============================================================
 
 document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') handleLogin();
+    if (e.key === 'Enter') {
+        handleLogin();
+    }
 });
 
 window.onload = function() {
     checkSession();
 };
+
 </script>
 </body>
 </html>
+<!-- ============================================================
+     КОНЕЦ ЧАСТИ 3 из 3 (ФИНАЛЬНАЯ)
+     Файл index.html полностью завершён
+     ============================================================ -->
