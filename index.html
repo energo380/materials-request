@@ -1,6 +1,22 @@
 <!-- ============================================================
-     INDEX.HTML - версия 4.0
-     Изменения относительно 3.0:
+     INDEX.HTML - версия 4.3
+     Изменения относительно 4.2:
+       1. Поля дат (фильтр истории, период журнала) всегда в виде
+          дд.мм.гггг: встроенное поле браузера подписывалось
+          по настройкам компьютера ("dd-mm-jjjj"). Точки ставятся
+          при наборе, календарь - по кнопке 📅
+     Изменения 4.2 относительно 4.1:
+       1. Кнопка "Печать" на главной заменена на "Печать журнала":
+          период, подразделение и вид журнала - только невыполненные
+          позиции или полный журнал с отметками выполнения. Журнал -
+          одна таблица, заявка с реквизитами и под ней её позиции
+     Изменения 4.1 относительно 4.0:
+       1. Печать заявки с фотоматериалами - кнопка "Печать с фото"
+          в открытой заявке. После заявки, с нового листа, идут фото
+          по позициям, по 4 на лист, со сквозной нумерацией; в таблице
+          заявки колонка "Фото" ссылается на их номера. Печать
+          начинается, когда фото загрузились с Google Диска
+     Изменения 4.0 относительно 3.0:
        1. Вложения (фото и PDF) к КАЖДОЙ позиции заявки - скрепка
           в таблице позиций: и в форме создания, и в открытой заявке
        2. Фото сжимается на устройстве: 1600 px по большей стороне,
@@ -686,6 +702,82 @@ body {
 .private-toggle.visible { display: flex; }
 .private-toggle input { width: 18px; height: 18px; cursor: pointer; accent-color: #00d4ff; }
 
+/* Печать журнала */
+.journal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+.journal-grid .journal-wide { grid-column: 1 / -1; }
+.journal-modes { display: flex; flex-direction: column; gap: 10px; }
+.journal-mode {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.journal-mode:hover { background: rgba(255, 255, 255, 0.1); }
+.journal-mode:has(input:checked) { border-color: rgba(0, 212, 255, 0.5); background: rgba(0, 212, 255, 0.1); }
+.journal-mode input { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; cursor: pointer; accent-color: #00d4ff; }
+.journal-mode strong { display: block; color: #fff; font-size: 14px; margin-bottom: 3px; }
+.journal-mode small { display: block; color: #aaa; font-size: 12px; }
+.journal-hint { color: #888; font-size: 12px; margin-top: 15px; text-align: center; }
+
+/* Поле даты: видимый текст всегда "дд.мм.гггг", а не формат из настроек
+   компьютера. Встроенное поле браузера скрыто - оно хранит значение и
+   открывает календарь по кнопке */
+.date-field { position: relative; display: flex; }
+.form-group .date-field .date-text { width: 100%; padding-right: 44px; }
+.form-group .date-field .date-text.invalid { box-shadow: 0 0 0 1px #ff6b6b; }
+.date-field .date-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #aaa;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.date-field .date-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.form-group .date-field .date-native {
+    position: absolute;
+    right: 5px;
+    bottom: 0;
+    width: 34px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+/* На телефонах календарь открывается касанием самого встроенного поля,
+   положенного поверх кнопки: iPhone не открывает его через showPicker() */
+@media (pointer: coarse) {
+    .form-group .date-field .date-native {
+        top: 50%;
+        bottom: auto;
+        transform: translateY(-50%);
+        height: 34px;
+        min-width: 0;
+        max-width: 34px;
+        -webkit-appearance: none;
+        appearance: none;
+        pointer-events: auto;
+        z-index: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .journal-grid { grid-template-columns: 1fr; }
+}
+
 /* ============================================================
    ВЛОЖЕНИЯ
    ============================================================ */
@@ -805,7 +897,7 @@ body {
         </div>
         <div class="header-buttons">
             <button class="btn btn-secondary" onclick="openHistory()">📋 История</button>
-            <button class="btn btn-secondary" onclick="printOrder()">🖨️ Печать</button>
+            <button class="btn btn-secondary" onclick="openJournalModal()">🖨️ Печать журнала</button>
             <button class="btn btn-danger" onclick="handleLogout()">🚪 Выход</button>
         </div>
     </div>
@@ -893,7 +985,11 @@ body {
                 </div>
                 <div class="form-group">
                     <label>Дата</label>
-                    <input type="date" id="filterDate" onchange="loadHistory(false)">
+                    <div class="date-field">
+                        <input type="text" class="date-text" placeholder="дд.мм.гггг" inputmode="numeric" maxlength="10" autocomplete="off">
+                        <button type="button" class="date-btn" title="Выбрать в календаре" tabindex="-1">📅</button>
+                        <input type="date" class="date-native" tabindex="-1" aria-hidden="true" id="filterDate" onchange="loadHistory(false)">
+                    </div>
                 </div>
                 <div class="form-group" style="align-self: flex-end;">
                     <button class="btn btn-secondary" onclick="clearFilters()">Сбросить</button>
@@ -926,6 +1022,62 @@ body {
                 <button class="btn btn-secondary" onclick="loadHistory(true)">⬇️ Загрузить ещё 15</button>
             </div>
             <div class="history-counter" id="historyCounter"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="journalModal">
+    <div class="modal" style="max-width: 640px;">
+        <div class="modal-header">
+            <h2>🖨️ Печать журнала заявок</h2>
+            <button class="modal-close" onclick="closeJournalModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="journal-grid">
+                <div class="form-group">
+                    <label>Период с</label>
+                    <div class="date-field">
+                        <input type="text" class="date-text" placeholder="дд.мм.гггг" inputmode="numeric" maxlength="10" autocomplete="off">
+                        <button type="button" class="date-btn" title="Выбрать в календаре" tabindex="-1">📅</button>
+                        <input type="date" class="date-native" tabindex="-1" aria-hidden="true" id="journalFrom">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>по</label>
+                    <div class="date-field">
+                        <input type="text" class="date-text" placeholder="дд.мм.гггг" inputmode="numeric" maxlength="10" autocomplete="off">
+                        <button type="button" class="date-btn" title="Выбрать в календаре" tabindex="-1">📅</button>
+                        <input type="date" class="date-native" tabindex="-1" aria-hidden="true" id="journalTo">
+                    </div>
+                </div>
+                <div class="form-group journal-wide">
+                    <label>Подразделение</label>
+                    <select id="journalDept"><option value="">Все</option></select>
+                </div>
+            </div>
+
+            <div class="journal-modes">
+                <label class="journal-mode">
+                    <input type="radio" name="journalMode" value="undone" checked>
+                    <span>
+                        <strong>Только невыполненное</strong>
+                        <small>Заявки, по которым что-то не привезено, и только эти позиции</small>
+                    </span>
+                </label>
+                <label class="journal-mode">
+                    <input type="radio" name="journalMode" value="full">
+                    <span>
+                        <strong>Полный журнал</strong>
+                        <small>Все заявки за период, все позиции с отметкой выполнения</small>
+                    </span>
+                </label>
+            </div>
+
+            <div class="journal-hint">Журнал откроется в новом окне. Чем длиннее период, тем дольше загрузка.</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeJournalModal()">Отмена</button>
+            <button class="btn btn-primary" onclick="printJournal()">🖨️ Сформировать</button>
         </div>
     </div>
 </div>
@@ -987,7 +1139,8 @@ body {
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="printOrderDetails()">🖨️ Печать</button>
+            <button class="btn btn-secondary" onclick="printOrderDetails(false)">🖨️ Печать</button>
+            <button class="btn btn-secondary" id="printPhotosBtn" onclick="printOrderDetails(true)" style="display: none;">🖨️ Печать с фото</button>
             <button class="btn btn-danger" id="deleteOrderBtn" onclick="deleteCurrentOrder()" style="display: none;">🗑️ Удалить</button>
             <button class="btn btn-primary" onclick="closeOrderDetails()">Закрыть</button>
         </div>
@@ -1052,6 +1205,10 @@ const DRAFT_KEY = 'orderDraft';
 const MAX_UNSENT = 3;            // максимум неотправленных заявок в очереди
 const MAX_SENT_KEPT = 10;        // сколько отправленных держим в списке
 const HISTORY_PAGE = 15;         // сколько заявок грузим за раз
+const JOURNAL_PAGE = 100;        // журнал: сколько заявок просим за запрос (сервер может отдать меньше)
+const JOURNAL_DAYS = 30;         // журнал: период по умолчанию, дней
+const JOURNAL_PARALLEL = 4;      // журнал: сколько заявок загружаем одновременно
+const JOURNAL_SORT_MARGIN = 3 * 24 * 3600 * 1000;   // журнал: запас на заявки, отправленные с опозданием
 const RETRY_DELAYS = [20000, 60000, 150000];  // автоповтор: 20с, 60с, 150с
 
 // --- Вложения -----------------------------------------------
@@ -1062,6 +1219,8 @@ const IMG_QUALITY = 0.7;
 const IDB_NAME = 'materialsFiles';
 const IDB_STORE = 'blobs';
 const VERIFY_TRIES = 5;
+const PRINT_PHOTO_SIZE = 1600;          // размер фото, которое запрашиваем с Диска для печати
+const PRINT_PHOTOS_TIMEOUT = 45000;     // сколько ждём загрузки фото перед печатью
 
 let currentUser = { role: '', department: '', employees: [], password: '' };
 let settings = { units: [], categories: [], departments: [], allDepartments: [] };
@@ -1134,6 +1293,129 @@ function sleep(ms) {
 
 function newId(prefix) {
     return prefix + '_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+}
+
+// ============================================================
+// ПОЛЕ ДАТЫ
+//
+// Встроенное поле даты браузер подписывает по региональным настройкам
+// компьютера ("dd-mm-jjjj" и т.п.), и страница это поменять не может.
+// Поэтому человек видит обычное текстовое поле "дд.мм.гггг", а скрытое
+// встроенное поле хранит значение (гггг-мм-дд, его id читает остальной
+// код) и открывает календарь по кнопке 📅.
+// ============================================================
+
+// 'гггг-мм-дд' -> 'дд.мм.гггг'
+function isoToRuDate(iso) {
+    var p = String(iso || '').split('-');
+    return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : '';
+}
+
+// 'дд.мм.гггг' -> 'гггг-мм-дд'; пустая строка, если такой даты нет
+function ruDateToIso(text) {
+    var m = String(text || '').match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (!m) return '';
+    var d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    if (d.getFullYear() !== Number(m[3]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[1])) return '';
+    return m[3] + '-' + m[2] + '-' + m[1];
+}
+
+// Точки ставим сами по мере набора: "07102026" -> "07.10.2026".
+// Если человек ставит точку сам, однозначные день и месяц дополняем
+// нулём: "7.3." -> "07.03."
+function maskRuDate(raw) {
+    var s = String(raw || '');
+    var parts = s.split(/\D+/);
+    if (parts.length > 1) {
+        if (parts[0].length === 1) parts[0] = '0' + parts[0];
+        if (parts.length > 2 && parts[1].length === 1) parts[1] = '0' + parts[1];
+    }
+    var digits = parts.join('').slice(0, 8);
+    var out = digits.slice(0, 2);
+    if (digits.length > 2) out += '.' + digits.slice(2, 4);
+    if (digits.length > 4) out += '.' + digits.slice(4);
+    if (/\D$/.test(s) && (digits.length === 2 || digits.length === 4)) out += '.';
+    return out;
+}
+
+// Значение из кода: и в скрытое поле, и в видимый текст
+function setDateValue(id, iso) {
+    var native = document.getElementById(id);
+    if (!native) return;
+    native.value = iso || '';
+    var text = native.parentNode.querySelector('.date-text');
+    if (text) {
+        text.value = isoToRuDate(native.value);
+        text.classList.remove('invalid');
+    }
+}
+
+function initDateField(wrap) {
+    var text = wrap.querySelector('.date-text');
+    var btn = wrap.querySelector('.date-btn');
+    var native = wrap.querySelector('.date-native');
+
+    // Полную верную дату (или пустое поле) передаём в скрытое поле -
+    // его onchange работает как раньше
+    function commit(iso) {
+        if (native.value === iso) return;
+        native.value = iso;
+        native.dispatchEvent(new Event('change'));
+    }
+
+    text.addEventListener('input', function() {
+        var pos = text.selectionStart;
+        if (pos !== null && pos < text.value.length) {
+            // Правка в середине (например, меняют только день): текст не
+            // переделываем, иначе добавится ноль, курсор убежит в конец
+            // и сохранится не та дата. Убираем только лишние символы
+            var clean = text.value.replace(/[^\d.]/g, '');
+            if (clean !== text.value) {
+                var keep = text.value.slice(0, pos).replace(/[^\d.]/g, '').length;
+                text.value = clean;
+                text.setSelectionRange(keep, keep);
+            }
+        } else {
+            text.value = maskRuDate(text.value);
+        }
+        if (text.value === '') {
+            text.classList.remove('invalid');
+            commit('');
+            return;
+        }
+        var iso = ruDateToIso(text.value);
+        text.classList.toggle('invalid', text.value.length === 10 && !iso);
+        if (iso) commit(iso);
+    });
+
+    // Уходя из поля, дописываем дату до полной ("7.3.26" -> "07.03.2026").
+    // Если не вышло - не подменяем молча прежней датой, а подсвечиваем
+    text.addEventListener('blur', function() {
+        if (!text.value) { text.classList.remove('invalid'); return; }
+        var full = maskRuDate(text.value).replace(/^(\d{2})\.(\d{2})\.(\d{2})$/, '$1.$2.20$3');
+        var iso = ruDateToIso(full);
+        if (iso) {
+            text.value = full;
+            text.classList.remove('invalid');
+            commit(iso);
+        } else {
+            text.classList.add('invalid');
+        }
+    });
+
+    // Дата выбрана в календаре
+    native.addEventListener('change', function() {
+        text.value = isoToRuDate(native.value);
+        text.classList.remove('invalid');
+    });
+
+    btn.addEventListener('click', function() {
+        try {
+            if (native.showPicker) { native.showPicker(); return; }
+        } catch (e) { }
+        native.focus();
+        native.click();
+    });
 }
 
 // ============================================================
@@ -1583,6 +1865,12 @@ function populateSelects() {
     settings.allDepartments.forEach(function(dept) {
         filterDeptSelect.innerHTML += '<option value="' + esc(dept) + '">' + esc(dept) + '</option>';
     });
+
+    var journalDeptSelect = document.getElementById('journalDept');
+    journalDeptSelect.innerHTML = filterDeptSelect.innerHTML;
+    // Подразделению по умолчанию показываем его заявки, администратору - все
+    journalDeptSelect.value = isAdmin ? '' : (currentUser.department || '');
+    if (journalDeptSelect.selectedIndex < 0) journalDeptSelect.value = '';
 
     // Приватная заявка - только для администратора
     document.getElementById('privateGroup').style.display = isAdmin ? 'flex' : 'none';
@@ -2459,6 +2747,20 @@ function refreshDetailsFileButtons() {
         var c = filesCountForOrderPosition(currentOrderId, posNum);
         cell.innerHTML = fileButtonHtml('openFilesForPosition(' + Number(posNum) + ')', c.total, c.pending);
     });
+    refreshPrintPhotosButton();
+}
+
+function isPdfFile(f) {
+    return f.mimeType === 'application/pdf' || /\.pdf$/i.test(f.origName || f.name || '');
+}
+
+// Кнопка "Печать с фото" видна, только если у заявки есть фото на сервере
+function refreshPrintPhotosButton() {
+    var btn = document.getElementById('printPhotosBtn');
+    if (!btn) return;
+    var count = currentOrderFiles.filter(function(f) { return !isPdfFile(f); }).length;
+    btn.style.display = count > 0 ? 'inline-flex' : 'none';
+    btn.textContent = '🖨️ Печать с фото (' + count + ')';
 }
 
 function openFilesForPosition(positionNum) {
@@ -2558,9 +2860,8 @@ function buildServerFileCard(f, isAdmin) {
 
     var thumbWrap = document.createElement('div');
     thumbWrap.className = 'file-thumb-wrap';
-    var isPdf = /\.pdf$/i.test(f.origName || f.name || '');
 
-    if (isPdf) {
+    if (isPdfFile(f)) {
         thumbWrap.innerHTML = '<div class="file-thumb-icon">📄</div>';
     } else {
         var img = document.createElement('img');
@@ -2885,7 +3186,7 @@ function closeHistory() {
 
 function clearFilters() {
     document.getElementById('filterDepartment').value = '';
-    document.getElementById('filterDate').value = '';
+    setDateValue('filterDate', '');
     loadHistory(false);
 }
 
@@ -3245,31 +3546,382 @@ async function deleteCurrentOrder() {
 // ПЕЧАТЬ
 // ============================================================
 
-function printOrder() {
-    var positions = getPositionsData();
-    if (positions.length === 0) {
-        showToast('Нет данных для печати', 'warning');
-        return;
-    }
+// ------------------------------------------------------------
+// Журнал заявок за период
+//
+// Отбора по периоду на сервере нет, поэтому список собираем из той же
+// истории (getHistory) порциями, а позиции каждой заявки берём через
+// getOrderDetails - по несколько заявок одновременно.
+// ------------------------------------------------------------
 
-    generatePrintContent({
-        number: document.getElementById('orderNumber').value || 'Новая заявка',
-        date: document.getElementById('orderDate').value,
-        department: document.getElementById('orderDepartment').value,
-        object: document.getElementById('orderObject').value,
-        category: document.getElementById('orderCategory').value,
-        createdBy: document.getElementById('orderCreatedBy').value,
-        positions: positions
-    });
+// Период по умолчанию, подставленный в последний раз. Пока человек его
+// не менял, при каждом открытии пересчитываем от сегодняшнего дня -
+// иначе во вкладке, открытой со вчера, журнал потерял бы сегодняшние заявки
+var journalAutoDates = null;
+
+function openJournalModal() {
+    var fromInput = document.getElementById('journalFrom');
+    var toInput = document.getElementById('journalTo');
+    var untouched = journalAutoDates &&
+        fromInput.value === journalAutoDates.from && toInput.value === journalAutoDates.to;
+    if (!fromInput.value || !toInput.value || untouched) {
+        var today = new Date();
+        var start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - JOURNAL_DAYS);
+        setDateValue('journalFrom', inputDateValue(start));
+        setDateValue('journalTo', inputDateValue(today));
+        journalAutoDates = { from: fromInput.value, to: toInput.value };
+    }
+    document.getElementById('journalModal').classList.add('active');
 }
 
-function printOrderDetails() {
+function closeJournalModal() {
+    document.getElementById('journalModal').classList.remove('active');
+}
+
+// Date -> 'гггг-мм-дд' для <input type="date">
+function inputDateValue(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// 'гггг-мм-дд' -> Date (начало дня по местному времени)
+function parseInputDate(value) {
+    var p = String(value || '').split('-');
+    if (p.length !== 3) return null;
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function formatDay(d) {
+    return String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+}
+
+// Дата заявки приходит строкой 'дд.мм.гггг чч:мм'
+function parseOrderDate(value) {
+    var s = String(value || '');
+    var m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\D+(\d{1,2}):(\d{2}))?/);
+    if (m) return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), Number(m[4] || 0), Number(m[5] || 0));
+    var t = Date.parse(s);
+    return isNaN(t) ? null : new Date(t);
+}
+
+// Повторяем запрос один раз, если не было связи
+async function apiRequestRetry(params) {
+    var res = await apiRequest(params);
+    if (!res.success && res.transport) res = await apiRequest(params);
+    return res;
+}
+
+// Выполняет fn для каждого элемента, не больше limit одновременно
+async function runLimited(items, limit, fn) {
+    var results = new Array(items.length);
+    var next = 0;
+    async function worker() {
+        while (next < items.length) {
+            var i = next++;
+            results[i] = await fn(items[i], i);
+        }
+    }
+    var workers = [];
+    for (var w = 0; w < Math.min(limit, items.length); w++) workers.push(worker());
+    await Promise.all(workers);
+    return results;
+}
+
+// Заявки за период. Если сервер отдаёт историю от новых к старым,
+// останавливаемся, когда ЦЕЛАЯ порция заметно старше периода: одна
+// заявка, ушедшая из очереди с опозданием или с неверными часами
+// компьютера, остановить просмотр не может. Запас JOURNAL_SORT_MARGIN -
+// для таких заявок. Если порядок дат нарушен, просматриваем историю до конца.
+async function fetchJournalOrders(dept, from, toEnd, onProgress, cancelled) {
+    var found = [];
+    var seen = {};                 // порции могут сдвинуться, если заявку сохранили во время просмотра
+    var unknownDate = 0;
+    var offset = 0;
+    var lastTime = Infinity;
+    var newestFirst = true;
+    // Период в один день сервер умеет отобрать сам
+    var singleDay = formatDay(from) === formatDay(toEnd) ? formatDay(from) : '';
+
+    while (true) {
+        if (cancelled()) return null;
+        var res = await apiRequestRetry({
+            action: 'getHistory',
+            password: currentUser.password,
+            filterDept: dept,
+            filterDate: singleDay,
+            offset: offset,
+            limit: JOURNAL_PAGE
+        });
+        if (!res.success) {
+            throw new Error(res.timeout ? 'Сервер долго отвечает. Попробуйте ещё раз.' : (res.error || 'Не удалось загрузить список заявок'));
+        }
+
+        var orders = res.orders || [];
+        var pageNewest = -Infinity;
+        orders.forEach(function(o) {
+            if (seen[o.id]) return;
+            seen[o.id] = true;
+            var d = parseOrderDate(o.date);
+            if (!d) { unknownDate++; return; }
+            if (d.getTime() > lastTime) newestFirst = false;
+            lastTime = d.getTime();
+            if (lastTime > pageNewest) pageNewest = lastTime;
+            if (d >= from && d <= toEnd) found.push({ order: o, time: d.getTime() });
+        });
+
+        offset += orders.length;
+        onProgress(offset, res.total || offset);
+
+        if (!res.hasMore || orders.length === 0) break;
+        if (newestFirst && pageNewest > -Infinity && pageNewest < from.getTime() - JOURNAL_SORT_MARGIN) break;
+    }
+    return { items: found, unknownDate: unknownDate };
+}
+
+async function printJournal() {
+    if (document.querySelector('#journalModal .date-text.invalid')) {
+        showToast('Дата указана не полностью — нужно дд.мм.гггг', 'error');
+        return;
+    }
+    var from = parseInputDate(document.getElementById('journalFrom').value);
+    var to = parseInputDate(document.getElementById('journalTo').value);
+    if (!from || !to) { showToast('Укажите период', 'error'); return; }
+    if (from > to) { showToast('Дата «с» позже даты «по»', 'error'); return; }
+
+    var toEnd = new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999);
+    var deptSelect = document.getElementById('journalDept');
+    var dept = deptSelect.value;
+    var modeInput = document.querySelector('input[name="journalMode"]:checked');
+    var opts = {
+        mode: modeInput ? modeInput.value : 'undone',
+        from: from,
+        to: to,
+        deptLabel: dept ? dept : 'все'
+    };
+
+    // Окно открываем сразу, пока действует нажатие кнопки - иначе
+    // браузер заблокирует его как всплывающее
+    var win = window.open('', '_blank');
+    if (!win) {
+        showToast('Браузер заблокировал окно печати. Разрешите всплывающие окна.', 'warning');
+        return;
+    }
+    win.document.write(journalPageHtml('Журнал заявок',
+        '<div class="status" id="journalStatus">Загружаю список заявок…</div>'));
+    win.document.close();
+    closeJournalModal();
+
+    function cancelled() { return win.closed; }
+    function status(text) {
+        try {
+            var el = win.document.getElementById('journalStatus');
+            if (el) el.textContent = text;
+        } catch (e) { }
+    }
+
+    try {
+        var list = await fetchJournalOrders(dept, from, toEnd, function(seen, total) {
+            status('Загружаю список заявок: просмотрено ' + seen + ' из ' + total + '…');
+        }, cancelled);
+        if (!list || cancelled()) return;
+
+        // Для "невыполненного" полностью выполненные заявки даже не открываем
+        var todo = list.items.filter(function(it) {
+            if (opts.mode !== 'undone') return true;
+            var total = Number(it.order.totalPositions);
+            var done = Number(it.order.completedPositions);
+            return !(total > 0 && done >= total);
+        });
+        todo.sort(function(a, b) {
+            return (a.time - b.time) || String(a.order.number).localeCompare(String(b.order.number));
+        });
+
+        var loaded = 0;
+        status('Загружаю позиции заявок: 0 из ' + todo.length + '…');
+        var entries = await runLimited(todo, JOURNAL_PARALLEL, async function(it) {
+            if (cancelled()) return null;
+            var res = await apiRequestRetry({
+                action: 'getOrderDetails',
+                orderId: it.order.id,
+                password: currentUser.password
+            });
+            loaded++;
+            status('Загружаю позиции заявок: ' + loaded + ' из ' + todo.length + '…');
+            if (!res.success) {
+                return { order: it.order, positions: null, error: res.timeout ? 'сервер долго отвечает' : (res.error || 'нет ответа сервера') };
+            }
+            return { order: it.order, positions: res.positions || [] };
+        });
+        if (cancelled()) return;
+
+        var journal = buildJournalHtml(opts, entries.filter(Boolean), list.unknownDate);
+        win.document.open();
+        win.document.write(journal.html);
+        win.document.close();
+        if (journal.rows > 0) {
+            win.focus();
+            win.print();
+        }
+    } catch (e) {
+        if (cancelled()) return;
+        status('Журнал не сформирован: ' + (e && e.message ? e.message : e) + '. Закройте окно и попробуйте ещё раз.');
+    }
+}
+
+function journalOrderState(done, total) {
+    if (total > 0 && done >= total) return 'Выполнена';
+    if (done > 0) return 'Частично: выполнено ' + done + ' из ' + total;
+    return 'Не выполнена';
+}
+
+function buildJournalHtml(opts, entries, unknownDate) {
+    var undoneOnly = opts.mode === 'undone';
+    var cols = undoneOnly ? 6 : 7;
+    var body = '';
+    var ordersCount = 0, rowsCount = 0, undoneCount = 0, positionsCount = 0, failed = 0;
+    var cell = '<td class="c">';
+
+    // У каждой заявки своя таблица: её заголовок вместе с названиями колонок
+    // стоит в <thead>, и браузер повторяет его на каждом листе, если
+    // заявка не уместилась на одном. Ширины колонок общие - через <colgroup>.
+    var colgroup =
+        '<colgroup>' +
+            '<col style="width:36px;"><col>' +
+            '<col style="width:55px;"><col style="width:55px;">' +
+            '<col style="width:90px;"><col style="width:140px;">' +
+            (undoneOnly ? '' : '<col style="width:112px;">') +
+        '</colgroup>';
+    var columnsRow =
+        '<tr class="cols">' +
+            '<th>№</th><th>Наименование материала</th><th>Ед.изм.</th><th>Кол-во</th>' +
+            '<th>Артикул</th><th>Примечание</th>' +
+            (undoneOnly ? '' : '<th>Отметка</th>') +
+        '</tr>';
+
+    entries.forEach(function(e) {
+        var o = e.order;
+        var positions = e.positions || [];
+        var done = positions.filter(function(p) { return p.status == 1; });
+        var rows = undoneOnly ? positions.filter(function(p) { return p.status != 1; }) : positions;
+        if (!e.error && rows.length === 0) return;
+
+        var state = e.error
+            ? journalOrderState(Number(o.completedPositions) || 0, Number(o.totalPositions) || 0)
+            : journalOrderState(done.length, positions.length);
+
+        ordersCount++;
+        body +=
+            '<table class="order">' + colgroup +
+                '<thead>' +
+                    '<tr class="order-head"><td colspan="' + cols + '">' +
+                        '<div class="oh-state">' + esc(state) + '</div>' +
+                        '<div class="oh-main">Заявка № ' + esc(o.number) + ' от ' + esc(o.date) + ' — ' + esc(o.department) + '</div>' +
+                        '<div class="oh-meta">Объект: ' + esc(o.object || '-') + ' • Категория: ' + esc(o.category || '-') +
+                            ' • Создал: ' + esc(o.createdBy || '-') + '</div>' +
+                    '</td></tr>' +
+                    columnsRow +
+                '</thead>' +
+                '<tbody>';
+
+        if (e.error) {
+            failed++;
+            body += '<tr><td colspan="' + cols + '" class="err">Позиции не загрузились (' + esc(e.error) +
+                '). Откройте заявку в истории или сформируйте журнал ещё раз.</td></tr>';
+        }
+
+        rows.forEach(function(p) {
+            var isDone = p.status == 1;
+            rowsCount++;
+            positionsCount++;
+            if (!isDone) undoneCount++;
+            body +=
+                '<tr class="' + (isDone ? 'done' : 'undone') + '">' +
+                    cell + esc(p.position) + '</td>' +
+                    '<td class="name">' + esc(p.name) + '</td>' +
+                    cell + esc(p.unit) + '</td>' +
+                    cell + esc(p.quantity) + '</td>' +
+                    cell + esc(p.article || '-') + '</td>' +
+                    '<td>' + esc(p.note || '-') + '</td>' +
+                    (undoneOnly ? '' : '<td class="c mark">' + (isDone ? '✓ выполнено' : '✗ не выполнено') + '</td>') +
+                '</tr>';
+        });
+        body += '</tbody></table>';
+    });
+
+    var title = undoneOnly ? 'ЖУРНАЛ НЕВЫПОЛНЕННЫХ ПОЗИЦИЙ' : 'ЖУРНАЛ ЗАЯВОК';
+    var sub = 'Период: ' + formatDay(opts.from) + ' — ' + formatDay(opts.to) +
+        ' • Подразделение: ' + opts.deptLabel + ' • Сформирован: ' + formatDate(new Date());
+
+    var summary = undoneOnly
+        ? 'Заявок с невыполненными позициями: ' + ordersCount + ' • Не выполнено позиций: ' + undoneCount
+        : 'Заявок: ' + ordersCount + ' • Позиций: ' + positionsCount + ', из них не выполнено: ' + undoneCount;
+
+    var notes = '';
+    if (failed > 0) notes += '<p class="warn">Не загрузились позиции заявок: ' + failed + ' — они отмечены в журнале.</p>';
+    if (unknownDate > 0) notes += '<p class="warn">Заявок с нераспознанной датой: ' + unknownDate + ' — в журнал не вошли.</p>';
+
+    var content;
+    if (ordersCount === 0) {
+        content = '<div class="status">' + (undoneOnly
+            ? 'За этот период невыполненных позиций нет.'
+            : 'За этот период заявок нет.') + '</div>';
+    } else {
+        content = body;
+    }
+
+    var html = journalPageHtml(title,
+        '<div class="toolbar no-print"><button onclick="window.print()">🖨 Печать</button></div>' +
+        '<h1>' + esc(title) + '</h1>' +
+        '<p class="sub">' + esc(sub) + '</p>' +
+        (ordersCount > 0 ? '<p class="summary">' + esc(summary) + '</p>' : '') +
+        notes +
+        content);
+
+    return { html: html, rows: rowsCount };
+}
+
+function journalPageHtml(title, bodyHtml) {
+    return '<!DOCTYPE html>' +
+        '<html>' +
+        '<head>' +
+            '<meta charset="UTF-8">' +
+            '<title>' + esc(title) + '</title>' +
+            '<style>' +
+                'body { font-family: Arial, sans-serif; padding: 20px; font-size: 12px; color: #000; }' +
+                'h1 { text-align: center; font-size: 17px; margin: 0 0 6px; }' +
+                '.sub { text-align: center; font-size: 12px; color: #333; margin: 0 0 4px; }' +
+                '.summary { text-align: center; font-size: 12px; font-weight: bold; margin: 0 0 14px; }' +
+                '.warn { font-size: 12px; color: #a00; margin: 0 0 8px; }' +
+                '.status { padding: 40px 20px; text-align: center; font-size: 15px; color: #333; }' +
+                '.toolbar { text-align: right; margin-bottom: 10px; }' +
+                '.toolbar button { padding: 6px 14px; font-size: 14px; cursor: pointer; }' +
+                'table.order { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 8px; page-break-inside: avoid; break-inside: avoid; }' +
+                'th, td { border: 1px solid #000; padding: 4px 6px; vertical-align: top; overflow-wrap: break-word; }' +
+                'tr.cols th { background: #f0f0f0; font-size: 10px; padding: 2px 6px; font-weight: normal; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+                'td.c { text-align: center; }' +
+                'td.mark { white-space: nowrap; }' +
+                'tr.order-head td { background: #e6e6e6; padding: 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+                '.oh-state { float: right; font-weight: bold; margin-left: 10px; }' +
+                '.oh-main { font-weight: bold; font-size: 12px; }' +
+                '.oh-meta { font-size: 11px; margin-top: 2px; }' +
+                'tr.undone td.name { font-weight: bold; }' +
+                'tr.done td { color: #555; }' +
+                'td.err { color: #a00; font-style: italic; }' +
+                '@media print { .no-print { display: none !important; } body { padding: 0; } }' +
+            '</style>' +
+        '</head>' +
+        '<body>' + bodyHtml + '</body>' +
+        '</html>';
+}
+
+function printOrderDetails(withPhotos) {
     var positions = [];
     var rows = document.getElementById('detailsPositionsBody').querySelectorAll('tr');
 
     rows.forEach(function(row) {
         var cells = row.querySelectorAll('td');
         positions.push({
+            num: row.getAttribute('data-position'),   // по нему фото находят свою позицию
             name: cells[1].textContent,
             unit: cells[2].textContent,
             quantity: cells[3].textContent,
@@ -3286,11 +3938,167 @@ function printOrderDetails() {
         category: document.getElementById('detailCategory').textContent,
         createdBy: document.getElementById('detailCreatedBy').textContent,
         positions: positions,
-        files: currentOrderFiles
+        files: currentOrderFiles,
+        withPhotos: !!withPhotos
+    });
+}
+
+// ------------------------------------------------------------
+// Фотоматериалы для печати
+// ------------------------------------------------------------
+
+// ID файла на Google Диске - из поля fileId или из ссылок на файл
+function driveFileId(f) {
+    if (f.fileId) return String(f.fileId);
+    var links = [f.url, f.thumbUrl];
+    for (var i = 0; i < links.length; i++) {
+        var s = String(links[i] || '');
+        var m = s.match(/\/d\/([\w-]{20,})/) || s.match(/[?&]id=([\w-]{20,})/);
+        if (m) return m[1];
+    }
+    return '';
+}
+
+// Миниатюра с сервера мелкая для печати - просим у Диска то же фото
+// покрупнее. Не вышло - печатаем саму миниатюру (data-fallback).
+function drivePrintSrc(f) {
+    var thumb = String(f.thumbUrl || '');
+    if (/[?&]sz=/.test(thumb)) return thumb.replace(/([?&]sz=)[^&#]*/, '$1w' + PRINT_PHOTO_SIZE);
+    if (/googleusercontent\.com\//.test(thumb) && /=[swh]\d+[-\w]*$/.test(thumb)) {
+        return thumb.replace(/=[swh]\d+[-\w]*$/, '=s' + PRINT_PHOTO_SIZE);
+    }
+    var id = driveFileId(f);
+    if (id) return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w' + PRINT_PHOTO_SIZE;
+    return thumb;
+}
+
+// Фото раскладываем по позициям в порядке таблицы и нумеруем сквозь всю
+// заявку. Фото, чья позиция не нашлась, идут последней группой.
+function groupPrintPhotos(positions, files) {
+    var photos = (files || []).filter(function(f) { return !isPdfFile(f); });
+    var groups = [];
+    var used = [];
+    var no = 0;
+
+    function numbered(list) {
+        return list.map(function(f) { return { file: f, no: ++no }; });
+    }
+
+    positions.forEach(function(pos, index) {
+        var num = (pos.num !== null && pos.num !== undefined) ? Number(pos.num) : index + 1;
+        var items = photos.filter(function(f) { return Number(f.positionNum) === num; });
+        if (items.length === 0) return;
+        used = used.concat(items);
+        groups.push({ index: index, title: 'Позиция ' + (index + 1) + '. ' + pos.name, items: numbered(items) });
+    });
+
+    var rest = photos.filter(function(f) { return used.indexOf(f) === -1; });
+    if (rest.length > 0) groups.push({ index: -1, title: 'Прочие фото', items: numbered(rest) });
+
+    return { groups: groups, count: no };
+}
+
+function buildPrintPhotosHtml(data, groups) {
+    var html =
+        '<div class="photos">' +
+            '<h1>ФОТОМАТЕРИАЛЫ К ЗАЯВКЕ № ' + esc(data.number) + '</h1>' +
+            '<p class="photos-sub">' + esc(data.date) + ' • ' + esc(data.department) + ' • ' + esc(data.object || '-') + '</p>';
+
+    groups.forEach(function(g) {
+        for (var i = 0; i < g.items.length; i += 2) {
+            var row = '<div class="photo-row">';
+            g.items.slice(i, i + 2).forEach(function(it) {
+                var f = it.file;
+                var src = drivePrintSrc(f);
+                var fallback = (f.thumbUrl && f.thumbUrl !== src) ? f.thumbUrl : '';
+                var meta = [f.origName || f.name, f.by, f.at].filter(Boolean).join(' • ');
+                // Номер позиции в подписи: на следующем листе заголовка группы уже не видно
+                row +=
+                    '<div class="photo">' +
+                        '<div class="photo-frame"><img alt="" data-src="' + esc(src) + '"' +
+                            (fallback ? ' data-fallback="' + esc(fallback) + '"' : '') + '></div>' +
+                        '<div class="photo-cap"><strong>Фото ' + it.no + '</strong>' +
+                            (g.index >= 0 ? ' — позиция ' + (g.index + 1) : '') +
+                            (meta ? '<br><span class="photo-meta">' + esc(meta) + '</span>' : '') +
+                        '</div>' +
+                    '</div>';
+            });
+            row += '</div>';
+            // Заголовок позиции держим вместе с первым рядом фото,
+            // чтобы он не остался один внизу листа
+            html += i === 0
+                ? '<div class="photo-keep"><h2>' + esc(g.title) + '</h2>' + row + '</div>'
+                : row;
+        }
+    });
+
+    return html + '</div>';
+}
+
+// Фото в окне печати грузим сами: так знаем, когда все готовы, и можем
+// подменить не загрузившееся. Печать не ждёт дольше PRINT_PHOTOS_TIMEOUT.
+function loadPrintPhotos(win, timeoutMs) {
+    return new Promise(function(resolve) {
+        var imgs = [];
+        var counter = null;
+        try {
+            imgs = Array.prototype.slice.call(win.document.querySelectorAll('img[data-src]'));
+            counter = win.document.getElementById('printPhotosCount');
+        } catch (e) { }
+
+        var total = imgs.length;
+        var left = total;
+        var failed = 0;
+        var finished = false;
+        var timer = null;
+
+        function finish() {
+            if (finished) return;
+            finished = true;
+            if (timer) clearTimeout(timer);
+            resolve({ total: total, failed: failed, pending: left });
+        }
+
+        function settle() {
+            left--;
+            if (counter) counter.textContent = (total - left) + ' из ' + total;
+            if (left <= 0) finish();
+        }
+
+        if (total === 0) { finish(); return; }
+        timer = setTimeout(finish, timeoutMs);
+
+        imgs.forEach(function(img) {
+            img.onload = settle;
+            img.onerror = function() {
+                var fallback = img.getAttribute('data-fallback');
+                if (fallback) {
+                    img.removeAttribute('data-fallback');
+                    img.src = fallback;
+                    return;
+                }
+                img.onerror = null;
+                failed++;
+                if (img.parentNode) {
+                    img.parentNode.innerHTML = '<div class="photo-missing">Фото не загрузилось.<br>Откройте его в заявке по скрепке.</div>';
+                }
+                settle();
+            };
+            img.src = img.getAttribute('data-src');
+        });
     });
 }
 
 function generatePrintContent(data) {
+    var photoInfo = groupPrintPhotos(data.positions, data.withPhotos ? data.files : []);
+    var withPhotos = photoInfo.count > 0;
+
+    // Номера фото по строкам таблицы - для ссылок "Фото" в заявке
+    var photoRefs = {};
+    photoInfo.groups.forEach(function(g) {
+        photoRefs[g.index] = g.items.map(function(it) { return it.no; }).join(', ');
+    });
+
     var positionsHTML = '';
 
     data.positions.forEach(function(pos, index) {
@@ -3302,17 +4110,39 @@ function generatePrintContent(data) {
                 '<td style="border:1px solid #000;padding:8px;text-align:center;">' + esc(pos.quantity) + '</td>' +
                 '<td style="border:1px solid #000;padding:8px;text-align:center;">' + esc(pos.article || '-') + '</td>' +
                 '<td style="border:1px solid #000;padding:8px;">' + esc(pos.note || '-') + '</td>' +
+                (withPhotos
+                    ? '<td style="border:1px solid #000;padding:8px;text-align:center;">' + esc(photoRefs[index] || '-') + '</td>'
+                    : '') +
             '</tr>';
     });
 
     var filesHTML = '';
-    if (data.files && data.files.length > 0) {
+    if (withPhotos) {
+        filesHTML = '<div class="files-block"><p><strong>Приложение:</strong> фотоматериалы, ' +
+            photoInfo.count + ' фото (на отдельных листах).</p>';
+        var pdfs = data.files.filter(isPdfFile);
+        if (pdfs.length > 0) {
+            filesHTML += '<p><strong>Документы PDF</strong> (печатаются отдельно):</p><ul>';
+            pdfs.forEach(function(f) {
+                filesHTML += '<li>Позиция ' + esc(f.positionNum) + ': ' + esc(f.origName || f.name) + '</li>';
+            });
+            filesHTML += '</ul>';
+        }
+        filesHTML += '</div>';
+    } else if (data.files && data.files.length > 0) {
         filesHTML = '<div class="files-block"><p><strong>Вложения:</strong></p><ul>';
         data.files.forEach(function(f) {
             filesHTML += '<li>Позиция ' + esc(f.positionNum) + ': ' + esc(f.origName || f.name) + '</li>';
         });
         filesHTML += '</ul></div>';
     }
+
+    var statusHTML = withPhotos
+        ? '<div class="print-status no-print">' +
+              '<span id="printStatusText">Загружаю фотографии: <span id="printPhotosCount">0 из ' + photoInfo.count + '</span>…</span>' +
+              '<button onclick="window.print()">🖨 Печать</button>' +
+          '</div>'
+        : '';
 
     var printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -3337,9 +4167,25 @@ function generatePrintContent(data) {
                 '.files-block ul { margin-left: 20px; }' +
                 '.footer { margin-top: 40px; }' +
                 '.signature-block { margin-top: 30px; }' +
+                '.print-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 20px; border: 1px solid #e0c060; border-radius: 6px; background: #fff8dc; font-size: 14px; }' +
+                '.print-status button { padding: 6px 14px; font-size: 14px; cursor: pointer; }' +
+                '.photos { page-break-before: always; break-before: page; }' +
+                '.photos h1 { margin-bottom: 6px; }' +
+                '.photos-sub { text-align: center; font-size: 12px; color: #444; margin: 0 0 16px; }' +
+                '.photos h2 { font-size: 14px; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #000; }' +
+                '.photo-keep, .photo-row { page-break-inside: avoid; break-inside: avoid; }' +
+                '.photo-row { display: flex; justify-content: space-between; margin-bottom: 12px; }' +
+                '.photo { width: 49%; }' +
+                '.photo-frame { height: 88mm; border: 1px solid #999; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fff; }' +
+                '.photo-frame img { max-width: 100%; max-height: 100%; display: block; }' +
+                '.photo-cap { font-size: 11px; margin-top: 4px; word-break: break-word; }' +
+                '.photo-meta { color: #555; }' +
+                '.photo-missing { font-size: 12px; color: #555; text-align: center; padding: 10px; }' +
+                '@media print { .no-print { display: none !important; } }' +
             '</style>' +
         '</head>' +
         '<body>' +
+            statusHTML +
             '<h1>ЗАЯВКА НА МАТЕРИАЛЫ № ' + esc(data.number) + '</h1>' +
 
             '<div class="header-info">' +
@@ -3359,6 +4205,7 @@ function generatePrintContent(data) {
                         '<th style="width:60px;">Кол-во</th>' +
                         '<th style="width:100px;">Артикул</th>' +
                         '<th style="width:150px;">Примечание</th>' +
+                        (withPhotos ? '<th style="width:60px;">Фото</th>' : '') +
                     '</tr>' +
                 '</thead>' +
                 '<tbody>' + positionsHTML + '</tbody>' +
@@ -3375,11 +4222,33 @@ function generatePrintContent(data) {
                     '<p><strong>Дата:</strong> _______________</p>' +
                 '</div>' +
             '</div>' +
+
+            (withPhotos ? buildPrintPhotosHtml(data, photoInfo.groups) : '') +
         '</body>' +
         '</html>'
     );
     printWindow.document.close();
-    printWindow.print();
+
+    if (!withPhotos) {
+        printWindow.print();
+        return;
+    }
+
+    // Печатаем, когда фото загрузились: иначе на листах будут пустые рамки
+    loadPrintPhotos(printWindow, PRINT_PHOTOS_TIMEOUT).then(function(res) {
+        try {
+            if (printWindow.closed) return;
+            var missing = res.failed + res.pending;
+            var text = printWindow.document.getElementById('printStatusText');
+            if (text) {
+                text.textContent = missing === 0
+                    ? 'Фотографии загружены.'
+                    : 'Не загрузилось фото: ' + missing + ' из ' + res.total + '. Можно напечатать как есть.';
+            }
+            printWindow.focus();
+            printWindow.print();
+        } catch (e) { }
+    });
 }
 
 // ============================================================
@@ -3393,6 +4262,8 @@ function generatePrintContent(data) {
 document.getElementById('passwordInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') handleLogin();
 });
+
+document.querySelectorAll('.date-field').forEach(initDateField);
 
 document.getElementById('orderForm').addEventListener('input', scheduleDraftSave);
 document.getElementById('orderForm').addEventListener('change', scheduleDraftSave);
@@ -3439,5 +4310,5 @@ window.onload = function() {
 </body>
 </html>
 <!-- ============================================================
-     КОНЕЦ ФАЙЛА index.html (версия 4.0)
+     КОНЕЦ ФАЙЛА index.html (версия 4.3)
      ============================================================ -->
