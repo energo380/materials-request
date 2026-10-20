@@ -13,6 +13,9 @@
        4. Печать заявки - колонка "Привезено" и строка "Выполнение".
           Журнал - отметка "◐ 3 из 5", а в "Только невыполненном" у
           частично привезённых - "привезено 3 из 5, не хватает 2"
+       5. Поле "Привезено": стрелки меняют число на 1, а не на 0,01.
+          Сохраняется при уходе из поля или по Enter - не на каждое
+          нажатие стрелки
      Изменения 4.3 относительно 4.2:
        1. Поля дат (фильтр истории, период журнала) всегда в виде
           дд.мм.гггг: встроенное поле браузера подписывалось
@@ -3556,11 +3559,14 @@ function renderDetailProgress(tr) {
     if (p.short > 0) hint = '<div class="got-hint part">не хватает ' + esc(fmtQty(p.short)) + '</div>';
     if (p.over > 0) hint = '<div class="got-hint over">больше на ' + esc(fmtQty(p.over)) + '</div>';
 
+    // step="any": стрелки меняют на 1, дробное (до сотых) вписывают руками.
+    // Сохраняем при уходе из поля или по Enter, а не по change: стрелки
+    // дают change на каждое нажатие, и каждое ушло бы на сервер
     tr.querySelector('.col-got').innerHTML =
         '<div class="got ' + p.state + '">' +
-            '<input type="number" min="0" step="0.01" inputmode="decimal" placeholder="0" ' +
+            '<input type="number" min="0" step="any" inputmode="decimal" placeholder="0" ' +
                 'value="' + (p.got > 0 ? esc(fmtQty(p.got)) : '') + '" ' +
-                'onchange="onDeliveredChange(this)" onkeydown="if (event.key === \'Enter\') this.blur()"' +
+                'onblur="onDeliveredChange(this)" onkeydown="if (event.key === \'Enter\') this.blur()"' +
                 (currentOrderCanChange && qtyKnown ? '' : ' disabled') + '>' +
             '<span>из ' + esc(qtyKnown ? fmtQty(p.qty) : pos.quantity) + '</span>' +
         '</div>' + hint;
@@ -3621,7 +3627,9 @@ function onDeliveredChange(input) {
     }
     value = roundQty(value);
     var current = isNaN(p.got) ? 0 : p.got;
-    if (value === current) { renderDetailProgress(tr); return; }
+    // Без изменений не перерисовываем: при уходе из поля кликом по кнопке
+    // статуса перерисовка заменила бы кнопку, и нажатие потерялось бы
+    if (value === current) return;
     if (value < current && currentUser.role !== 'admin') {
         showToast('Уменьшить количество может только администратор', 'warning');
         renderDetailProgress(tr);
