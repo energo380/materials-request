@@ -1,6 +1,19 @@
 <!-- ============================================================
-     INDEX.HTML - версия 4.3
-     Изменения относительно 4.2:
+     INDEX.HTML - версия 4.4
+     Нужен скрипт сервера v4.1 (действие setDelivered)
+     Изменения относительно 4.3:
+       1. Сколько привезено по позиции - колонка "Привезено" в открытой
+          заявке. Вводится общее количество, до сотых. Статус: ничего -
+          красный, часть - жёлтый "3/5" и "не хватает 2", всё - зелёный,
+          больше заказанного - зелёный и "больше на 1"
+       2. Кнопка статуса - "привезли всё". Увеличить количество может
+          любой, уменьшить и снять отметку - только администратор
+       3. В шапке заявки строка "Выполнение: 3 из 5, частично 1".
+          В истории заявка жёлтая, если хоть что-то привезено
+       4. Печать заявки - колонка "Привезено" и строка "Выполнение".
+          Журнал - отметка "◐ 3 из 5", а в "Только невыполненном" у
+          частично привезённых - "привезено 3 из 5, не хватает 2"
+     Изменения 4.3 относительно 4.2:
        1. Поля дат (фильтр истории, период журнала) всегда в виде
           дд.мм.гггг: встроенное поле браузера подписывалось
           по настройкам компьютера ("dd-mm-jjjj"). Точки ставятся
@@ -682,6 +695,25 @@ body {
 .history-table .col-viewed { width: 80px; text-align: center; }
 .history-table .col-viewed .status-btn { margin: 0 auto; }
 
+/* Привезено по позиции */
+.status-btn.partial {
+    background: rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+    font-size: 11px;
+    font-weight: bold;
+}
+.positions-table.with-got { min-width: 1010px; }
+.positions-table .col-got { width: 130px; }
+.got { display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #aaa; font-size: 13px; }
+.positions-table .got input { width: 64px; padding: 6px; text-align: center; }
+.got.full input { box-shadow: 0 0 0 1px rgba(0, 255, 136, 0.5); }
+.got.part input { box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.6); }
+.got input:disabled { opacity: 0.6; cursor: not-allowed; }
+.got-hint { font-size: 11px; margin-top: 3px; }
+.got-hint.part { color: #ffc107; }
+.got-hint.over { color: #00ff88; }
+
 /* Кнопка "Загрузить ещё" */
 .load-more-wrap { text-align: center; margin-top: 20px; }
 .history-counter { text-align: center; color: #888; font-size: 12px; margin-top: 12px; }
@@ -1118,10 +1150,14 @@ body {
                     <label>Просмотрено</label>
                     <span id="detailViewedWrap"></span>
                 </div>
+                <div class="detail-item">
+                    <label>Выполнение</label>
+                    <span id="detailProgress">-</span>
+                </div>
             </div>
 
             <div class="positions-table-container">
-                <table class="positions-table">
+                <table class="positions-table with-got">
                     <thead>
                         <tr>
                             <th class="col-num">№</th>
@@ -1130,6 +1166,7 @@ body {
                             <th class="col-qty">Кол-во</th>
                             <th class="col-article">Артикул/Код</th>
                             <th class="col-note">Примечание</th>
+                            <th class="col-got">Привезено</th>
                             <th class="col-status">Статус</th>
                             <th class="col-files">Файл</th>
                         </tr>
@@ -1229,6 +1266,7 @@ let currentOrderNumber = '';
 let currentOrderViewed = 0;
 let currentOrderPositions = [];
 let currentOrderFiles = [];
+let currentOrderCanChange = false;   // можно ли отмечать привезённое в открытой заявке
 let positionRowCount = 0;
 
 // Файлы, приложенные в форме создания (заявка ещё не имеет ID с сервера).
@@ -3251,16 +3289,8 @@ async function loadHistory(append) {
     var isAdmin = currentUser.role === 'admin';
 
     orders.forEach(function(order) {
-        var statusClass = 'pending';
-        var statusText = 'Ожидает';
-
-        if (order.completedPositions === order.totalPositions && order.totalPositions > 0) {
-            statusClass = 'completed';
-            statusText = 'Выполнено';
-        } else if (order.completedPositions > 0) {
-            statusClass = 'partial';
-            statusText = order.completedPositions + '/' + order.totalPositions;
-        }
+        var badge = progressBadge(Number(order.completedPositions) || 0, Number(order.totalPositions) || 0,
+                                  Number(order.partialPositions) || 0, false);
 
         var viewedClass = order.viewed == 1 ? 'viewed' : 'not-viewed';
         var viewedIcon = order.viewed == 1 ? '👁' : '✕';
@@ -3279,7 +3309,7 @@ async function loadHistory(append) {
             '<td>' + esc(order.object || '-') + '</td>' +
             '<td>' + esc(order.category) + '</td>' +
             '<td>' + esc(order.createdBy || '-') + '</td>' +
-            '<td class="cell-status"><span class="status-badge ' + statusClass + '">' + esc(statusText) + '</span></td>' +
+            '<td class="cell-status"><span class="status-badge ' + badge.cls + '">' + esc(badge.text) + '</span></td>' +
             '<td class="col-viewed">' +
                 '<button class="status-btn ' + viewedClass + '" ' +
                     'title="' + (order.viewed == 1 ? 'Заявка просмотрена' : 'Заявка не просмотрена') + '" ' +
@@ -3296,16 +3326,14 @@ async function loadHistory(append) {
 }
 
 // Обновляет одну строку истории без перезагрузки списка
-function updateHistoryRow(orderId, completed, total, viewed) {
+function updateHistoryRow(orderId, completed, total, viewed, partial) {
     var tr = document.querySelector('#historyBody tr[data-order-id="' + orderId + '"]');
     if (!tr) return;
 
     if (completed !== null) {
-        var statusClass = 'pending', statusText = 'Ожидает';
-        if (completed === total && total > 0) { statusClass = 'completed'; statusText = 'Выполнено'; }
-        else if (completed > 0) { statusClass = 'partial'; statusText = completed + '/' + total; }
+        var badge = progressBadge(completed, total, partial || 0, false);
         var cell = tr.querySelector('.cell-status');
-        if (cell) cell.innerHTML = '<span class="status-badge ' + statusClass + '">' + esc(statusText) + '</span>';
+        if (cell) cell.innerHTML = '<span class="status-badge ' + badge.cls + '">' + esc(badge.text) + '</span>';
     }
 
     if (viewed !== null) {
@@ -3407,18 +3435,16 @@ async function openOrderDetails(orderId) {
     document.getElementById('deleteOrderBtn').style.display =
         result.canEdit ? 'inline-flex' : 'none';
 
+    // Общий пул: отмечать привезённое может любой пользователь
+    currentOrderCanChange = !!result.canChangeStatus;
+
     var tbody = document.getElementById('detailsPositionsBody');
     tbody.innerHTML = '';
 
-    currentOrderPositions.forEach(function(pos) {
-        var statusClass = pos.status == 1 ? 'completed' : 'not-completed';
-        var statusIcon = pos.status == 1 ? '✓' : '✕';
-        // Общий пул: отмечать выполнение может любой пользователь.
-        // Снять отметку - только администратор.
-        var canChange = result.canChangeStatus && (currentUser.role === 'admin' || pos.status == 0);
-
+    currentOrderPositions.forEach(function(pos, idx) {
         var tr = document.createElement('tr');
         tr.setAttribute('data-position', pos.position);
+        tr.setAttribute('data-idx', idx);
         tr.innerHTML =
             '<td class="col-num">' + esc(pos.position) + '</td>' +
             '<td class="col-name">' + esc(pos.name) + '</td>' +
@@ -3426,18 +3452,15 @@ async function openOrderDetails(orderId) {
             '<td class="col-qty">' + esc(pos.quantity) + '</td>' +
             '<td class="col-article">' + esc(pos.article || '-') + '</td>' +
             '<td class="col-note">' + esc(pos.note || '-') + '</td>' +
-            '<td class="col-status">' +
-                '<button class="status-btn ' + statusClass + '" ' +
-                    'onclick="toggleStatus(this, ' + esc(pos.rowIndex) + ', ' + (pos.status == 1 ? 1 : 0) + ', \'' + esc(orderId) + '\')" ' +
-                    (canChange ? '' : 'disabled') + '>' +
-                    statusIcon +
-                '</button>' +
-            '</td>' +
+            '<td class="col-got"></td>' +
+            '<td class="col-status"></td>' +
             '<td class="col-files"></td>';
 
         tbody.appendChild(tr);
+        renderDetailProgress(tr);
     });
 
+    renderOrderProgress();
     refreshDetailsFileButtons();
 
     document.getElementById('historyModal').classList.remove('active');
@@ -3447,12 +3470,8 @@ async function openOrderDetails(orderId) {
 function closeOrderDetails() {
     // Обновляем строку в списке, не перезагружая всю историю
     if (currentOrderId) {
-        var rows = document.getElementById('detailsPositionsBody').querySelectorAll('tr');
-        var total = rows.length, completed = 0;
-        rows.forEach(function(row) {
-            if (row.querySelector('.status-btn.completed')) completed++;
-        });
-        updateHistoryRow(currentOrderId, completed, total, currentOrderViewed);
+        var c = orderProgressCounts(currentOrderPositions);
+        updateHistoryRow(currentOrderId, c.full, c.total, currentOrderViewed, c.part);
     }
 
     document.getElementById('orderDetailsModal').classList.remove('active');
@@ -3464,43 +3483,184 @@ function closeOrderDetails() {
 }
 
 // ============================================================
-// СТАТУС ПОЗИЦИИ
+// СТАТУС ПОЗИЦИИ: СКОЛЬКО ПРИВЕЗЕНО
+//
+// Привезённое - общее количество, до сотых. Цвет позиции: ничего -
+// красный, часть - жёлтый, всё или больше - зелёный. Статус "выполнено"
+// сервер ставит сам, когда привезено не меньше заказанного.
+// Увеличить количество может любой, уменьшить - только администратор.
 // ============================================================
 
-async function toggleStatus(btn, rowIndex, currentStatus, orderId) {
-    var newStatus = currentStatus == 1 ? 0 : 1;
+// Число из поля или ответа сервера: 5, "2.5", "2,5". Не число - NaN
+function parseQty(value) {
+    if (typeof value === 'number') return isFinite(value) ? value : NaN;
+    var s = String(value === null || value === undefined ? '' : value).replace(/\s/g, '').replace(',', '.');
+    if (s === '') return NaN;
+    var n = Number(s);
+    return isFinite(n) ? n : NaN;
+}
 
-    if (currentUser.role !== 'admin' && currentStatus == 1) {
+function roundQty(n) { return Math.round(n * 100) / 100; }
+function fmtQty(n) { return String(roundQty(n)); }
+
+// Состояние позиции. Сервер до v4.1 не присылает delivered -
+// тогда судим по статусу: выполнено = привезено всё
+function positionProgress(pos) {
+    var qty = parseQty(pos.quantity);
+    var got = parseQty(pos.delivered);
+    var full = pos.status == 1;
+    if (isNaN(got)) got = full ? qty : 0;
+    var state = full ? 'full' : (got > 0 ? 'part' : 'none');
+    var known = !isNaN(qty) && !isNaN(got);
+    return {
+        qty: qty,
+        got: got,        // NaN, если не распознано количество в заявке
+        state: state,    // none / part / full
+        short: (state === 'part' && known) ? roundQty(qty - got) : 0,
+        over: (full && known && got > qty) ? roundQty(got - qty) : 0
+    };
+}
+
+function orderProgressCounts(positions) {
+    var c = { total: positions.length, full: 0, part: 0 };
+    positions.forEach(function(pos) {
+        var state = positionProgress(pos).state;
+        if (state === 'full') c.full++;
+        else if (state === 'part') c.part++;
+    });
+    return c;
+}
+
+// Плашка выполнения заявки: зелёная - привезено всё, жёлтая - хоть
+// что-то, красная - ничего. long - для шапки заявки и печати
+function progressBadge(full, total, part, long) {
+    var tail = part > 0 ? ', частично ' + part : '';
+    if (total > 0 && full >= total) return { cls: 'completed', text: long ? full + ' из ' + total : 'Выполнено' };
+    if (full > 0 || part > 0) return { cls: 'partial', text: (long ? full + ' из ' + total : full + '/' + total) + tail };
+    return { cls: 'pending', text: long ? '0 из ' + total : 'Ожидает' };
+}
+
+function detailPosition(tr) {
+    return currentOrderPositions[Number(tr.getAttribute('data-idx'))];
+}
+
+// Ячейки "Привезено" и "Статус" одной позиции. Ячейку вложений не
+// трогаем - её рисует refreshDetailsFileButtons
+function renderDetailProgress(tr) {
+    var pos = detailPosition(tr);
+    var p = positionProgress(pos);
+    var isAdmin = currentUser.role === 'admin';
+    var qtyKnown = !isNaN(p.qty);
+
+    var hint = '';
+    if (p.short > 0) hint = '<div class="got-hint part">не хватает ' + esc(fmtQty(p.short)) + '</div>';
+    if (p.over > 0) hint = '<div class="got-hint over">больше на ' + esc(fmtQty(p.over)) + '</div>';
+
+    tr.querySelector('.col-got').innerHTML =
+        '<div class="got ' + p.state + '">' +
+            '<input type="number" min="0" step="0.01" inputmode="decimal" placeholder="0" ' +
+                'value="' + (p.got > 0 ? esc(fmtQty(p.got)) : '') + '" ' +
+                'onchange="onDeliveredChange(this)" onkeydown="if (event.key === \'Enter\') this.blur()"' +
+                (currentOrderCanChange && qtyKnown ? '' : ' disabled') + '>' +
+            '<span>из ' + esc(qtyKnown ? fmtQty(p.qty) : pos.quantity) + '</span>' +
+        '</div>' + hint;
+
+    var cls = 'not-completed', label = '✕', title = 'Ничего не привезено. Нажмите, если привезли всё';
+    if (p.state === 'full') {
+        cls = 'completed'; label = '✓';
+        title = isAdmin ? 'Привезено всё. Нажмите, чтобы снять отметку' : 'Привезено всё';
+    } else if (p.state === 'part') {
+        cls = 'partial';
+        label = qtyKnown ? fmtQty(p.got) + '/' + fmtQty(p.qty) : '◐';
+        if (label.length > 5) label = '◐';   // длинные числа в кружок не влезают
+        title = 'Привезено ' + fmtQty(p.got) + (qtyKnown ? ' из ' + fmtQty(p.qty) : '') + '. Нажмите, если привезли всё';
+    }
+    // Отметить "привезли всё" может любой, снять отметку - только администратор
+    var canClick = currentOrderCanChange && (isAdmin || p.state !== 'full');
+
+    tr.querySelector('.col-status').innerHTML =
+        '<button class="status-btn ' + cls + '" title="' + esc(title) + '" onclick="onStatusClick(this)"' +
+            (canClick ? '' : ' disabled') + '>' + esc(label) + '</button>';
+}
+
+function renderOrderProgress() {
+    var c = orderProgressCounts(currentOrderPositions);
+    var badge = progressBadge(c.full, c.total, c.part, true);
+    document.getElementById('detailProgress').innerHTML =
+        '<span class="status-badge ' + badge.cls + '">' + esc(badge.text) + '</span>';
+}
+
+// Кнопка статуса: "привезли всё", у выполненной (администратор) -
+// снять отметку, то есть "ничего не привезли"
+function onStatusClick(btn) {
+    var tr = btn.closest('tr');
+    var p = positionProgress(detailPosition(tr));
+
+    if (p.state === 'full' && currentUser.role !== 'admin') {
         showToast('Только администратор может отменить выполнение', 'warning');
         return;
     }
+    if (isNaN(p.qty)) {
+        // Количество в заявке не число - отмечаем по-старому, без "Привезено"
+        sendPositionUpdate(tr, { action: 'updateStatus', status: p.state === 'full' ? 0 : 1 });
+        return;
+    }
+    sendPositionUpdate(tr, { action: 'setDelivered', delivered: p.state === 'full' ? 0 : p.qty });
+}
 
-    btn.disabled = true;
-    showLoading();
+function onDeliveredChange(input) {
+    var tr = input.closest('tr');
+    var p = positionProgress(detailPosition(tr));
+    var raw = input.value.trim();
+    var value = raw === '' ? 0 : parseQty(raw);
 
-    var result = await apiRequest({
-        action: 'updateStatus',
+    if ((input.validity && input.validity.badInput) || isNaN(value) || value < 0) {
+        showToast('Введите число не меньше нуля', 'error');
+        renderDetailProgress(tr);
+        return;
+    }
+    value = roundQty(value);
+    var current = isNaN(p.got) ? 0 : p.got;
+    if (value === current) { renderDetailProgress(tr); return; }
+    if (value < current && currentUser.role !== 'admin') {
+        showToast('Уменьшить количество может только администратор', 'warning');
+        renderDetailProgress(tr);
+        return;
+    }
+    sendPositionUpdate(tr, { action: 'setDelivered', delivered: value });
+}
+
+// Пишет на сервер и перерисовывает только эту позицию - без
+// перезагрузки всей заявки. При отказе возвращает прежнее значение
+async function sendPositionUpdate(tr, params) {
+    var pos = detailPosition(tr);
+    var orderId = currentOrderId;
+    var request = {
         password: currentUser.password,
-        rowIndex: rowIndex,
-        status: newStatus,
-        orderId: orderId
-    });
+        orderId: orderId,
+        rowIndex: pos.rowIndex
+    };
+    Object.keys(params).forEach(function(k) { request[k] = params[k]; });
 
+    showLoading();
+    var result = await apiRequest(request);
     hideLoading();
-    btn.disabled = false;
 
     if (result.success) {
-        // Обновляем только эту кнопку - без перезагрузки всей заявки
-        btn.className = 'status-btn ' + (newStatus == 1 ? 'completed' : 'not-completed');
-        btn.textContent = newStatus == 1 ? '✓' : '✕';
-        btn.setAttribute('onclick',
-            'toggleStatus(this, ' + rowIndex + ', ' + newStatus + ', \'' + orderId + '\')');
-        if (newStatus == 1 && currentUser.role !== 'admin') btn.disabled = true;
-        showToast(newStatus == 1 ? 'Позиция выполнена' : 'Выполнение отменено', 'success');
+        pos.status = result.status;
+        pos.delivered = result.delivered !== undefined ? result.delivered : null;
+        var p = positionProgress(pos);
+        showToast(p.state === 'full' ? 'Позиция выполнена'
+            : p.state === 'part' ? 'Привезено ' + fmtQty(p.got) + ' из ' + fmtQty(p.qty)
+            : 'Отметка снята', 'success');
     } else {
         showToast(result.timeout ? 'Сервер долго отвечает. Попробуйте ещё раз.' : (result.error || 'Ошибка обновления статуса'),
                   result.timeout ? 'warning' : 'error');
     }
+
+    if (currentOrderId !== orderId) return;   // заявку уже закрыли
+    renderDetailProgress(tr);
+    renderOrderProgress();
 }
 
 // ============================================================
@@ -3768,17 +3928,25 @@ async function printJournal() {
     }
 }
 
-function journalOrderState(done, total) {
+function journalOrderState(done, total, part) {
     if (total > 0 && done >= total) return 'Выполнена';
-    if (done > 0) return 'Частично: выполнено ' + done + ' из ' + total;
+    if (done > 0 || part > 0) return 'Частично: выполнено ' + done + ' из ' + total + (part > 0 ? ', частично ' + part : '');
     return 'Не выполнена';
+}
+
+// Отметка в колонке "Отметка" полного журнала
+function journalMark(p) {
+    if (p.state === 'part') return '◐ ' + fmtQty(p.got) + (isNaN(p.qty) ? '' : ' из ' + fmtQty(p.qty));
+    if (p.state === 'none') return '✗ не выполнено';
+    if (p.over > 0) return '✓ ' + fmtQty(p.got) + ' из ' + fmtQty(p.qty);
+    return '✓ выполнено';
 }
 
 function buildJournalHtml(opts, entries, unknownDate) {
     var undoneOnly = opts.mode === 'undone';
     var cols = undoneOnly ? 6 : 7;
     var body = '';
-    var ordersCount = 0, rowsCount = 0, undoneCount = 0, positionsCount = 0, failed = 0;
+    var ordersCount = 0, rowsCount = 0, undoneCount = 0, partCount = 0, positionsCount = 0, failed = 0;
     var cell = '<td class="c">';
 
     // У каждой заявки своя таблица: её заголовок вместе с названиями колонок
@@ -3801,13 +3969,13 @@ function buildJournalHtml(opts, entries, unknownDate) {
     entries.forEach(function(e) {
         var o = e.order;
         var positions = e.positions || [];
-        var done = positions.filter(function(p) { return p.status == 1; });
-        var rows = undoneOnly ? positions.filter(function(p) { return p.status != 1; }) : positions;
+        var counts = orderProgressCounts(positions);
+        var rows = undoneOnly ? positions.filter(function(p) { return positionProgress(p).state !== 'full'; }) : positions;
         if (!e.error && rows.length === 0) return;
 
         var state = e.error
-            ? journalOrderState(Number(o.completedPositions) || 0, Number(o.totalPositions) || 0)
-            : journalOrderState(done.length, positions.length);
+            ? journalOrderState(Number(o.completedPositions) || 0, Number(o.totalPositions) || 0, Number(o.partialPositions) || 0)
+            : journalOrderState(counts.full, counts.total, counts.part);
 
         ordersCount++;
         body +=
@@ -3830,19 +3998,26 @@ function buildJournalHtml(opts, entries, unknownDate) {
         }
 
         rows.forEach(function(p) {
-            var isDone = p.status == 1;
+            var pr = positionProgress(p);
+            var isDone = pr.state === 'full';
             rowsCount++;
             positionsCount++;
             if (!isDone) undoneCount++;
+            if (pr.state === 'part') partCount++;
+            // В "невыполненном" колонки отметки нет - что привезено, пишем под названием
+            var partNote = (undoneOnly && pr.state === 'part')
+                ? '<div class="part-note">Привезено ' + esc(fmtQty(pr.got)) +
+                      (isNaN(pr.qty) ? '' : ' из ' + esc(fmtQty(pr.qty)) + ', не хватает ' + esc(fmtQty(pr.short))) + '</div>'
+                : '';
             body +=
                 '<tr class="' + (isDone ? 'done' : 'undone') + '">' +
                     cell + esc(p.position) + '</td>' +
-                    '<td class="name">' + esc(p.name) + '</td>' +
+                    '<td class="name">' + esc(p.name) + partNote + '</td>' +
                     cell + esc(p.unit) + '</td>' +
                     cell + esc(p.quantity) + '</td>' +
                     cell + esc(p.article || '-') + '</td>' +
                     '<td>' + esc(p.note || '-') + '</td>' +
-                    (undoneOnly ? '' : '<td class="c mark">' + (isDone ? '✓ выполнено' : '✗ не выполнено') + '</td>') +
+                    (undoneOnly ? '' : '<td class="c mark">' + esc(journalMark(pr)) + '</td>') +
                 '</tr>';
         });
         body += '</tbody></table>';
@@ -3852,9 +4027,10 @@ function buildJournalHtml(opts, entries, unknownDate) {
     var sub = 'Период: ' + formatDay(opts.from) + ' — ' + formatDay(opts.to) +
         ' • Подразделение: ' + opts.deptLabel + ' • Сформирован: ' + formatDate(new Date());
 
+    var partTail = partCount > 0 ? ' (привезено частично: ' + partCount + ')' : '';
     var summary = undoneOnly
-        ? 'Заявок с невыполненными позициями: ' + ordersCount + ' • Не выполнено позиций: ' + undoneCount
-        : 'Заявок: ' + ordersCount + ' • Позиций: ' + positionsCount + ', из них не выполнено: ' + undoneCount;
+        ? 'Заявок с невыполненными позициями: ' + ordersCount + ' • Не выполнено позиций: ' + undoneCount + partTail
+        : 'Заявок: ' + ordersCount + ' • Позиций: ' + positionsCount + ', из них не выполнено: ' + undoneCount + partTail;
 
     var notes = '';
     if (failed > 0) notes += '<p class="warn">Не загрузились позиции заявок: ' + failed + ' — они отмечены в журнале.</p>';
@@ -3905,6 +4081,7 @@ function journalPageHtml(title, bodyHtml) {
                 '.oh-main { font-weight: bold; font-size: 12px; }' +
                 '.oh-meta { font-size: 11px; margin-top: 2px; }' +
                 'tr.undone td.name { font-weight: bold; }' +
+                '.part-note { font-weight: normal; font-size: 11px; margin-top: 2px; }' +
                 'tr.done td { color: #555; }' +
                 'td.err { color: #a00; font-style: italic; }' +
                 '@media print { .no-print { display: none !important; } body { padding: 0; } }' +
@@ -3915,19 +4092,16 @@ function journalPageHtml(title, bodyHtml) {
 }
 
 function printOrderDetails(withPhotos) {
-    var positions = [];
-    var rows = document.getElementById('detailsPositionsBody').querySelectorAll('tr');
-
-    rows.forEach(function(row) {
-        var cells = row.querySelectorAll('td');
-        positions.push({
-            num: row.getAttribute('data-position'),   // по нему фото находят свою позицию
-            name: cells[1].textContent,
-            unit: cells[2].textContent,
-            quantity: cells[3].textContent,
-            article: cells[4].textContent,
-            note: cells[5].textContent
-        });
+    var positions = currentOrderPositions.map(function(pos) {
+        return {
+            num: pos.position,   // по нему фото находят свою позицию
+            name: pos.name,
+            unit: pos.unit,
+            quantity: pos.quantity,
+            article: pos.article,
+            note: pos.note,
+            progress: positionProgress(pos)
+        };
     });
 
     generatePrintContent({
@@ -3938,6 +4112,7 @@ function printOrderDetails(withPhotos) {
         category: document.getElementById('detailCategory').textContent,
         createdBy: document.getElementById('detailCreatedBy').textContent,
         positions: positions,
+        progress: orderProgressCounts(currentOrderPositions),
         files: currentOrderFiles,
         withPhotos: !!withPhotos
     });
@@ -4089,6 +4264,15 @@ function loadPrintPhotos(win, timeoutMs) {
     });
 }
 
+// "Привезено" в печатной заявке. Ничего не привезли - клетка пустая,
+// чтобы можно было вписать от руки
+function printGotText(p) {
+    if (p.state === 'none') return '';
+    if (p.state === 'part') return fmtQty(p.got) + (p.short > 0 ? ' (не хватает ' + fmtQty(p.short) + ')' : '');
+    if (isNaN(p.got)) return '✓';
+    return '✓ ' + fmtQty(p.got) + (p.over > 0 ? ' (больше на ' + fmtQty(p.over) + ')' : '');
+}
+
 function generatePrintContent(data) {
     var photoInfo = groupPrintPhotos(data.positions, data.withPhotos ? data.files : []);
     var withPhotos = photoInfo.count > 0;
@@ -4110,6 +4294,7 @@ function generatePrintContent(data) {
                 '<td style="border:1px solid #000;padding:8px;text-align:center;">' + esc(pos.quantity) + '</td>' +
                 '<td style="border:1px solid #000;padding:8px;text-align:center;">' + esc(pos.article || '-') + '</td>' +
                 '<td style="border:1px solid #000;padding:8px;">' + esc(pos.note || '-') + '</td>' +
+                '<td style="border:1px solid #000;padding:8px;text-align:center;">' + esc(printGotText(pos.progress)) + '</td>' +
                 (withPhotos
                     ? '<td style="border:1px solid #000;padding:8px;text-align:center;">' + esc(photoRefs[index] || '-') + '</td>'
                     : '') +
@@ -4194,6 +4379,8 @@ function generatePrintContent(data) {
                 '<p><strong>Объект:</strong> ' + esc(data.object || '-') + '</p>' +
                 '<p><strong>Категория:</strong> ' + esc(data.category) + '</p>' +
                 '<p><strong>Создал заявку:</strong> ' + esc(data.createdBy || '-') + '</p>' +
+                '<p><strong>Выполнение:</strong> ' +
+                    esc(progressBadge(data.progress.full, data.progress.total, data.progress.part, true).text) + '</p>' +
             '</div>' +
 
             '<table>' +
@@ -4201,11 +4388,12 @@ function generatePrintContent(data) {
                     '<tr>' +
                         '<th style="width:40px;">№</th>' +
                         '<th>Наименование материала</th>' +
-                        '<th style="width:60px;">Ед.изм.</th>' +
-                        '<th style="width:60px;">Кол-во</th>' +
-                        '<th style="width:100px;">Артикул</th>' +
-                        '<th style="width:150px;">Примечание</th>' +
-                        (withPhotos ? '<th style="width:60px;">Фото</th>' : '') +
+                        '<th style="width:55px;">Ед.изм.</th>' +
+                        '<th style="width:55px;">Кол-во</th>' +
+                        '<th style="width:90px;">Артикул</th>' +
+                        '<th style="width:120px;">Примечание</th>' +
+                        '<th style="width:85px;">Привезено</th>' +
+                        (withPhotos ? '<th style="width:50px;">Фото</th>' : '') +
                     '</tr>' +
                 '</thead>' +
                 '<tbody>' + positionsHTML + '</tbody>' +
@@ -4310,5 +4498,5 @@ window.onload = function() {
 </body>
 </html>
 <!-- ============================================================
-     КОНЕЦ ФАЙЛА index.html (версия 4.3)
+     КОНЕЦ ФАЙЛА index.html (версия 4.4)
      ============================================================ -->
