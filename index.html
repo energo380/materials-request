@@ -889,6 +889,49 @@ body {
 .file-actions .btn { padding: 7px 12px; font-size: 12px; flex: 1; justify-content: center; }
 .files-empty { text-align: center; padding: 40px; color: #888; }
 .files-hint { color: #888; font-size: 12px; margin-top: 18px; text-align: center; }
+.files-webview-hint {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255, 193, 7, 0.12);
+    border: 1px solid rgba(255, 193, 7, 0.35);
+    color: #ffdb4d;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Поля выбора файла: невидимы, но не display:none - иначе часть
+   встроенных браузеров (мессенджеры) не открывает выбор файла */
+.files-footer { position: relative; }
+.file-input-hidden {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+.file-pick { -webkit-tap-highlight-color: transparent; user-select: none; }
+.file-pick.is-disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+
+/* Компьютер: одна кнопка «Добавить файл» */
+.pick-mobile { display: none; }
+.pick-label-mobile { display: none; }
+
+/* Телефон и планшет: «Камера» и «Галерея» крупно, «Файл / PDF» - рядом */
+@media (pointer: coarse) {
+    .pick-mobile { display: inline-flex; }
+    .pick-label-desktop { display: none; }
+    .pick-label-mobile { display: inline; }
+    .files-footer .pick-any {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .files-footer .btn { flex: 1 1 40%; justify-content: center; padding: 14px 12px; font-size: 15px; }
+}
 
 @media (max-width: 768px) {
     .queue-indicator { bottom: 20px; left: 20px; }
@@ -1217,10 +1260,24 @@ body {
             <div class="files-empty" id="filesEmpty" style="display:none;">Вложений нет</div>
             <div class="files-hint" id="filesHint"></div>
         </div>
-        <div class="modal-footer">
-            <input type="file" id="fileInput" accept="image/*,application/pdf" multiple
-                   style="display:none" onchange="handleFilePick(event)">
-            <button class="btn btn-primary" id="addFileBtn" onclick="document.getElementById('fileInput').click()">📷 Добавить файл</button>
+        <div class="modal-footer files-footer">
+            <!-- Три отдельных поля выбора: камера, галерея и файл (фото или PDF).
+                 Поле со смешанным accept (image + pdf) Android открывает как
+                 файловый менеджер без камеры, поэтому для камеры и галереи
+                 свои поля только с image/*. Поля не скрыты через display:none,
+                 а кнопки сделаны <label for>: так касание доходит до поля
+                 и во встроенных браузерах мессенджеров. -->
+            <input type="file" id="fileInputCamera" class="file-input-hidden" tabindex="-1"
+                   accept="image/*" capture="environment" onchange="handleFilePick(event)">
+            <input type="file" id="fileInputGallery" class="file-input-hidden" tabindex="-1"
+                   accept="image/*" multiple onchange="handleFilePick(event)">
+            <input type="file" id="fileInput" class="file-input-hidden" tabindex="-1"
+                   accept="image/*,application/pdf" multiple onchange="handleFilePick(event)">
+            <label for="fileInputCamera" class="btn btn-primary file-pick pick-mobile" tabindex="0">📷 Камера</label>
+            <label for="fileInputGallery" class="btn btn-primary file-pick pick-mobile" tabindex="0">🖼️ Галерея</label>
+            <label for="fileInput" class="btn btn-primary file-pick pick-any" tabindex="0">
+                <span class="pick-label-desktop">📎 Добавить файл</span><span class="pick-label-mobile">📄 Файл / PDF</span>
+            </label>
             <button class="btn btn-secondary" onclick="closeFilesModal()">Закрыть</button>
         </div>
     </div>
@@ -2889,11 +2946,65 @@ function renderFilesModal() {
     });
 
     var left = MAX_FILES_PER_POSITION - list.length;
-    document.getElementById('addFileBtn').disabled = left <= 0;
+    setFilePickersEnabled(left > 0);
     hint.textContent = left > 0
         ? 'Можно приложить ещё ' + left + ' (фото или PDF, до ' + Math.round(MAX_FILE_BYTES / 1048576) + ' МБ). Фото сжимается автоматически.'
         : 'Достигнут предел: ' + MAX_FILES_PER_POSITION + ' файла на позицию.';
+    renderWebviewHint(left > 0);
 }
+
+// Кнопки выбора - это <label>, атрибута disabled у них нет:
+// блокируем сами поля и гасим кнопки классом
+function setFilePickersEnabled(enabled) {
+    ['fileInputCamera', 'fileInputGallery', 'fileInput'].forEach(function(id) {
+        var input = document.getElementById(id);
+        if (input) input.disabled = !enabled;
+    });
+    document.querySelectorAll('#filesModal .file-pick').forEach(function(label) {
+        label.classList.toggle('is-disabled', !enabled);
+        label.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+        label.tabIndex = enabled ? 0 : -1;
+    });
+}
+
+// Страница открыта во встроенном браузере приложения (Telegram, WhatsApp,
+// Viber, MAX, VK и т.п.), а не в Chrome/Safari. Там выбор файла
+// иногда не работает - подсказываем, как открыть в обычном браузере
+function isInAppBrowser() {
+    var ua = navigator.userAgent || '';
+    if (/; wv\)|Telegram|WhatsApp|Viber|FBAN|FBAV|Instagram|VKAndroidApp|VKClient|OKApp|MicroMessenger|MAX\//i.test(ua)) return true;
+    // iPhone/iPad: у встроенных браузеров приложений нет метки Safari
+    if (/iPhone|iPad|iPod/.test(ua) && !/Safari\//.test(ua)) return true;
+    return false;
+}
+
+function renderWebviewHint(show) {
+    var modalBody = document.querySelector('#filesModal .modal-body');
+    var box = document.getElementById('filesWebviewHint');
+    if (!show || !isInAppBrowser()) {
+        if (box) box.style.display = 'none';
+        return;
+    }
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'filesWebviewHint';
+        box.className = 'files-webview-hint';
+        box.textContent = 'Если фото не прикрепляется, откройте эту страницу в обычном браузере: ' +
+            'меню ⋮ или ⋯ вверху → «Открыть в браузере».';
+        modalBody.appendChild(box);
+    }
+    box.style.display = 'block';
+}
+
+// С клавиатуры кнопку-<label> открываем по Enter и пробелу
+document.addEventListener('keydown', function(e) {
+    var el = e.target;
+    if (!el || !el.classList || !el.classList.contains('file-pick')) return;
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    var input = document.getElementById(el.getAttribute('for'));
+    if (input && !input.disabled) input.click();
+});
 
 function buildServerFileCard(f, isAdmin) {
     var card = document.createElement('div');
